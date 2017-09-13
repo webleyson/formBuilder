@@ -1,0 +1,52 @@
+    .createForm:hover {
+        cursor: pointer;
+    }
+
+    select.form-control {
+        height: 34px !important;
+    }
+
+
+
+    #questionSets ul {
+        padding: 0;
+        list-style: none;
+    }
+
+    #questionSets ul li {
+        display: inline-block;
+        border: 1px solid grey;
+        height: 150px;
+        width: 170px;
+        margin-right: 20px;
+        position: relative;
+        text-align: center;
+    }
+
+    #questionSets ul li a {
+        padding: 10px;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        background-color: #ffa500;
+        color: #fff;
+    }
+
+    .box {
+        -webkit-box-shadow: 0 2px 1px #777;
+        -moz-box-shadow: 0 2px 1px #777;
+        box-shadow: 0 2px 1px #777;
+        border-radius: 3px;
+        background-color: lightgrey;
+    }
+
+    #formTitle {
+        width: 100%;
+        border: 0;
+        padding: 10px;
+        font-size: 30px;
+    }
+
+    .hover:hover {
+        cursor: pointer;
+    }
