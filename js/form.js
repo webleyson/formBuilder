@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
     getQuestionSets();
+
     $('#addForm').on('hidden.bs.modal', function() {
         $('.modal-body #questionnaireForm').empty();
         getQuestionSets();
@@ -36,18 +37,26 @@ $(document).ready(function() {
                 if (obj.status == "ok") {
                     var qForm = $('#questionnaireForm');
                     qForm.empty();
+
                     $.each(obj.data, function(i, v) {
-                        $html = '<div class="row"><input class="rowContainer addToDB" type="hidden" value="' + v[0] + '" name="rowContainer"><div class="col-md-9"><input placeholder="Ask your question" value="' + v[1] + '" class="form-control question addToDB" type="text" name="question" id=""></div>';
-                        $html += '<div class="col-md-3"><select id="SelectBox_' + v[0] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
+                        $html = '<div class="row"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""></div>';
+                        $html += '<div class="col-md-3"><select id="SelectBox_' + v['id'] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
                         $(qForm).append($html);
-                        $(document).on('DOMNodeInserted', function(e) {
-                            $("#SelectBox_" + v[0]).val(v[2]);
-                        });
+
                     });
-                    $('#formTitle').val(obj.data[0][5]);
-                    $('#formTitle').attr('data-question-set', obj.data[0][6]);
+
+                    $('#formTitle').val(obj.data[0]['question_set_name']);
+                    $('#formTitle').attr('data-question-set', obj.data[0]['question_set_id']);
+                    selectDropDown(obj.data);
                 }
             },
+        })
+    }
+
+    function selectDropDown(obj) {
+        $.each(obj, function(k, v) {
+            //do not delete this code.
+            // console.log($("#SelectBox_" + v.id).val(v.input_type));
         })
     }
 
@@ -72,6 +81,7 @@ $(document).ready(function() {
             title: this.value,
             set_id: $(this).attr("data-question-set"),
         }
+        console.log(obj);
         formData.append('data', JSON.stringify(obj));
         ajaxUpdate(formData);
     });
@@ -80,24 +90,24 @@ $(document).ready(function() {
 
         var qSet = new Array();
         var formData = new FormData();
+        var obj = {};
 
-        $('#questionnaireForm .addToDB').each(function(k, v) {
+        var rows = $('.row');
+
+        rows.each(function(index) {
+            var obj = {
+                question: $(this).find('.question').val(),
+                replyType: $(this).find('.replyOption').val(),
+                question_id: $(this).find('.rowContainer').val(),
+                question_set_id: $('#formTitle').attr("data-question-set")
+            };
+            qSet.push(obj);
+        });
 
 
-            console.log(k + ":::" + v);
-
-            /* var obj = {
-     id: $(".rowContainer").val(),
-     question_set: $("#formDataSet").val(),
-     name: this.name,
-     value: this.value,
- };
- qSet.push(obj);*/
-        })
-
-        /* formData.append('do', 'saveQuestion');
- formData.append("data", JSON.stringify(qSet));
- ajaxUpdate(formData);*/
+        formData.append('do', 'saveQuestion');
+        formData.append("data", JSON.stringify(qSet));
+        ajaxUpdate(formData);
     });
 
     function ajaxUpdate(formData) {
@@ -111,14 +121,16 @@ $(document).ready(function() {
             contentType: false,
             cache: false,
             success: function(response) {
+                var obj = jQuery.parseJSON(response);
                 popSuccess(response);
+                populateExistingForm(obj.data.question_set_id)
             },
         })
     }
 
     function createNewSet() {
         var formData = new FormData();
-        formData.append('do', 'getNewId');
+        formData.append('do', 'newFormSet');
         $.ajax({
             url: "ajax/dbfunctions.ajax.php",
             type: 'POST',
@@ -139,7 +151,7 @@ $(document).ready(function() {
 
     function createEmptyDBField() {
         var formData = new FormData();
-        formData.append("question_set_id", $('#formDataSet').val());
+        formData.append("question_set_id", $('#formTitle').attr("data-question-set"));
         formData.append('do', 'createAndGetId');
         $.ajax({
             url: "ajax/dbfunctions.ajax.php",
