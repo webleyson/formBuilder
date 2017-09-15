@@ -23,7 +23,7 @@
         text-align: center;
     }
 
-    #questionSets ul li a {
+    #questionSets ul li a.loadExistingForm {
         padding: 10px;
         bottom: 0;
         width: 100%;
@@ -49,4 +49,30 @@
 
     .hover:hover {
         cursor: pointer;
+    }
+
+    a.form_delete {
+        background-color: pink !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: auto;
+        width: auto;
+    }
+
+    .optionContainer {
+        padding: 10px;
+        background: floralwhite;
+    }
+
+    .optionContainer input {
+        margin-bottom: 10px;
+        width: 70%;
+        float: left;
+    }
+
+    .optionRemove {
+        display: inline-block;
+        float: right;
+        font-size: 23px;
     }

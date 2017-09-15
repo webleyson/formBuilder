@@ -15,9 +15,112 @@ $(document).ready(function() {
         addField();
     })
 
+    $('#questionnaireForm').on('click', '.optionRemove', function() {
+        deleteOption($(this).attr("data-option-id"));
+    })
+
+    $('#newQuestionSet').on('click', '.addOption', function() {
+        addNewOption();
+    })
+
     $('#questionSets').on('click', '.loadExistingForm', function() {
         populateExistingForm($(this).attr("data-question-set-id"));
     })
+    $('#questionSets').on('click', '.form_delete', function(e) {
+        e.preventDefault();
+        if (confirm("Delete Question set?")) {
+            deleteForm($(this).attr('data-value'));
+        } else {
+            alert('Question set not deleted');
+            return false;
+        }
+    })
+
+    $('#questionnaireForm').on('change', '.replyOption', function() {
+
+        switch (this.value) {
+            default: return true;
+            break;
+            case "select":
+                    addSelectOption($(this).attr('data-question-id'));
+                break;
+            case "radio":
+                    text = "Today is Saturday";
+                break;
+            case "checkbox":
+                    text = "Today is Saturday";
+                break;
+        }
+    })
+
+
+
+    function addSelectOption(qid) {
+        createAndGetOptionId(qid);
+    }
+
+    function createAndGetOptionId(qid) {
+        var formData = new FormData();
+        formData.append("question_id", qid);
+        formData.append('do', 'createAndGetOptionId');
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                var obj = jQuery.parseJSON(response);
+                if (obj.status == "ok") {
+                    console.log("HELLO");
+                }
+            },
+        })
+    }
+
+    function deleteOption(optionId) {
+
+        var formData = new FormData();
+        formData.append('do', 'deleteOption');
+        formData.append("option_id", optionId);
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                popSuccess(response);
+                populateExistingForm($('#formTitle').attr("data-question-set"));
+            }
+        })
+    }
+
+    function addNewOption() {
+
+    }
+
+    function deleteForm(formId) {
+        var formData = new FormData();
+        formData.append('do', 'deleteForm');
+        formData.append("question_set_id", formId);
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                getQuestionSets();
+            }
+        })
+    }
 
     function populateExistingForm(question_set_id) {
         var formData = new FormData();
@@ -39,9 +142,10 @@ $(document).ready(function() {
                     qForm.empty();
 
                     $.each(obj.data, function(i, v) {
-                        $html = '<div class="row"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""></div>';
-                        $html += '<div class="col-md-3"><select id="SelectBox_' + v['id'] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
+                        $html = '<div id="row_' + v['id'] + '" class="row"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""></div>';
+                        $html += '<div class="col-md-3"><select id="SelectBox_' + v['id'] + '"data-question-id="' + v['id'] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
                         $(qForm).append($html);
+                        getAdditionalOptions(v['id']);
 
                     });
 
@@ -53,10 +157,43 @@ $(document).ready(function() {
         })
     }
 
+
+    function getAdditionalOptions(qid) {
+        var formData = new FormData();
+        formData.append('do', 'getOptions');
+        formData.append("question_id", qid);
+
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                var obj = jQuery.parseJSON(response);
+                if (obj.status == "ok") {
+                    var optionContainer = $('<div class="optionContainer"></div>');
+                    $.each(obj.data, function(i, v) {
+
+                        var html = '<div class="row"><div class="col-xs-12"><input type="text" class="form-control" value="' + v['answer_option'] + '"><span data-option-id="' + v['id'] + '" class="optionRemove hover"> x </span></div></div>';
+                        $("#row_" + v['question_id'] + "").after(optionContainer);
+
+                        $('.optionContainer').append(html);
+
+                    })
+                    var addText = '<i class="fa fa-plus hover addOption" aria-hidden="true"></i>';
+                    optionContainer.append(addText);
+                }
+            }
+        })
+    }
+
     function selectDropDown(obj) {
         $.each(obj, function(k, v) {
             //do not delete this code.
-            // console.log($("#SelectBox_" + v.id).val(v.input_type));
+            console.log($("#SelectBox_" + v.id).val(v.input_type));
         })
     }
 
@@ -67,7 +204,7 @@ $(document).ready(function() {
 
     function addField() {
 
-        $html = '<div class="row"><input class="rowContainer" type="hidden" name="rowContainer"><div class="col-md-9"><input placeholder="Ask your question" class="form-control question" type="text" name="question" id=""></div>';
+        $html = '<div class="row"><input class="rowContainer" type="hidden" name="rowContainer"><div class="col-md-9"><input placeholder="Ask your question" class="form-control question" type="text" name="question"></div>';
         $html += '<div class="col-md-3"><select name="replyOption" class="form-control replyOption"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
 
         $('#questionnaireForm').append($html);
@@ -143,7 +280,8 @@ $(document).ready(function() {
                 var obj = jQuery.parseJSON(response);
                 console.log(obj);
                 if (obj.status == "ok") {
-                    $('#formDataSet').val(obj.data);
+                    $('#formTitle').val("");
+                    $('#formTitle').attr('data-question-set', obj.data);
                 }
             },
         })
@@ -185,13 +323,13 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
-
+                console.log(obj);
                 if (obj.status == "ok") {
                     var questionDiv = $("#questionSets");
                     questionDiv.empty();
                     var list = $(questionDiv).append('<ul></ul>').find('ul');
                     $.each(obj.data, function(i, v) {
-                        list.append('<li  class="box"><h2>' + v[2] + '</h2><p>Questions</p><a data-question-set-id="' + v[1] + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v[0] + '</a></li>');
+                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a></li>');
                     });
                 }
             },

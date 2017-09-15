@@ -21,7 +21,7 @@ include('include/layout/header.php');
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
-                 <input id="formTitle" type="text"  name="formTitle">
+                 <input id="formTitle" type="text"  name="formTitle" placeholder="Add a title">
                   <div class="messageUpdate"></div>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
