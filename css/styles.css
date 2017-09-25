@@ -60,6 +60,11 @@
         width: auto;
     }
 
+    a.remove {
+        font-size: 10px;
+        display: none;
+    }
+
     .optionContainer {
         padding: 10px;
         background: floralwhite;
@@ -75,4 +80,8 @@
         display: inline-block;
         float: right;
         font-size: 23px;
+    }
+
+    .questionContainer {
+        height: 60px;
     }

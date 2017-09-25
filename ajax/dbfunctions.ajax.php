@@ -35,8 +35,16 @@ switch($do){
 	case 'getOptions':
 		getAdditionalOptions();
 		break;
+	case 'updateOption':
+		updateOption();
+		break;
 	case 'deleteOption':
 		deleteOption();
+		break;
+	case 'deleteQuestion':
+		deleteQuestion();
+		break;
+
 }
 
 
@@ -65,15 +73,34 @@ function createAndGetOptionId(){
 
 	$query = "INSERT INTO options(QUESTION_ID) VALUES ('$qid') RETURNING id ";
 
-	$result = pg_query($query); 
+	$result = pg_query($query);
 	$insert_row = pg_fetch_row($result);
+
 	if (!$result){
-		echo "Error adding option";
+		echo json_response('error', 'Unable to save form title');
 	}else{
-		$data = array('last_row' => ($insert_row[0]));
-		json_response('ok', 'Option Created', $data);
-	}	
+
+        json_response('ok', 'Form title saved...',$insert_row[0]);
+	}
 }
+
+
+function updateOption(){
+	$details = json_decode($_POST['data']);
+	$query = "UPDATE options SET ANSWER_OPTION = '$details->option_value', QUESTION_ID = '$details->question_id' WHERE ID = '$details->option_id'";
+
+
+	$result = pg_query($query);
+	$insert_row = pg_fetch_row($result);
+
+	if (!$result){
+		echo json_response('error', 'Unable to save form title');
+	}else{
+
+        json_response('ok', 'Option added...',$insert_row[0]);
+	}
+}
+
 
 function deleteOption(){
 	$optionId = json_decode($_POST['option_id']);
@@ -87,6 +114,18 @@ function deleteOption(){
 	}
 }
 
+function deleteQuestion(){
+	$questionId = json_decode($_POST['question_id']);
+	$query = "DELETE FROM options WHERE question_id = '$questionId'";
+	$result = pg_query($query);
+	if($result){
+		$query = "DELETE FROM questions WHERE id = '$questionId'";
+		$result = pg_query($query);
+		json_response('ok', 'Question deleted', $result);
+	}else{
+		json_response('error', 'Question doesnt exist');
+	}
+}
 
 function deleteFormAndAssociatedQuestions(){
 	$setId = json_decode($_POST['question_set_id']);
@@ -143,21 +182,23 @@ function getAllQuestionSets(){
 
 function saveTitle(){
 	$details = json_decode($_POST['data']);
-
 	if (isset($details->set_id)){
 		$query = "UPDATE nameids SET QUESTION_SET_NAME = '$details->title' WHERE QUESTION_SET_ID = '$details->set_id'";
 	}else{
 		$query = "INSERT INTO nameids(QUESTION_SET_NAME) VALUES ('$details->title') RETURNING question_set_id";
 	}
+		
 	$result = pg_query($query); 
 
-	if (!$result){
-		echo json_response('error', 'Unable to save form title');
-	}else{
+	$insert_row = pg_fetch_row($result);
 
-        json_response('ok', 'Form title saved...', $result);
-	}
 	
+	if (!$result){
+		echo "Error creating question";
+	}else{
+		$data = array('question_set' => ($insert_row[0]));
+		json_response('ok', 'Question set Created', $data);
+	}	
 }
 
 
@@ -170,7 +211,6 @@ function saveQuestion(){
 	foreach($questions as $item => $value) {
 		$key[$item] = $value;
 	}
-
 	foreach ($key as $inputs) {
 
 		if($inputs->question_id==='null'){
@@ -190,7 +230,7 @@ function saveQuestion(){
 }
 
 function newFormSet(){
-	$query = "select question_set_id from nameids order by question_set_id desc limit 1";
+	$query = "SELECT question_set_id FROM nameids ORDER BY question_set_id DESC LIMIT 1";
 
 	$result = pg_query($query); 
 	$row = pg_fetch_row($result);
