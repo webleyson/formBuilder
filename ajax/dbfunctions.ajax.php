@@ -51,7 +51,6 @@ switch($do){
 function getAdditionalOptions(){
 	$qid = json_decode($_POST['question_id']);
 
-
 	$query = "SELECT * FROM options WHERE question_id = '$qid'";
 
 	$result = pg_query($query); 
@@ -70,7 +69,6 @@ function getAdditionalOptions(){
 
 function createAndGetOptionId(){
 	$qid = json_decode($_POST['question_id']);
-
 	$query = "INSERT INTO options(QUESTION_ID) VALUES ('$qid') RETURNING id ";
 
 	$result = pg_query($query);
@@ -96,7 +94,6 @@ function updateOption(){
 	if (!$result){
 		echo json_response('error', 'Unable to save form title');
 	}else{
-
         json_response('ok', 'Option added...',$insert_row[0]);
 	}
 }
@@ -192,7 +189,6 @@ function saveTitle(){
 
 	$insert_row = pg_fetch_row($result);
 
-	
 	if (!$result){
 		echo "Error creating question";
 	}else{
@@ -211,15 +207,15 @@ function saveQuestion(){
 	foreach($questions as $item => $value) {
 		$key[$item] = $value;
 	}
-	foreach ($key as $inputs) {
+		foreach ($key as $inputs) {
 
-		if($inputs->question_id==='null'){
-	    	$query = "INSERT INTO questions(QUESTION, INPUT_TYPE, QUESTION_SET) VALUES ('$inputs->question', '$inputs->replyType', '$inputs->question_set_id')";
-		}else{
-			$query = "UPDATE questions SET QUESTION = '$inputs->question', INPUT_TYPE = '$inputs->replyType', QUESTION_SET = '$inputs->question_set_id' WHERE ID = '$inputs->question_id'";
+			if($inputs->question_id==='null'){
+		    	$query = "INSERT INTO questions(QUESTION, INPUT_TYPE, QUESTION_SET) VALUES ('$inputs->question', '$inputs->replyType', '$inputs->question_set_id')";
+			}else{
+				$query = "UPDATE questions SET QUESTION = '$inputs->question', INPUT_TYPE = '$inputs->replyType', QUESTION_SET = '$inputs->question_set_id' WHERE ID = '$inputs->question_id'";
+			}
+			$result = pg_query($query); 
 		}
-		$result = pg_query($query); 
-	}
 	
 	if (!$result){
 		json_response('error', 'Unable to process question');

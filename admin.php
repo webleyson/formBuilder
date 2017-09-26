@@ -35,7 +35,7 @@ include('include/layout/header.php');
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <i class="fa fa-plus fa-2x createQuestion pull-left hover" aria-hidden="true"></i>
+                  <i class="fa fa-plus fa-2x createQuestion pull-left hover" aria-hidden="true">Add Question</i>
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                   <button type="button" class="btn btn-primary">Save changes</button>
                 </div>

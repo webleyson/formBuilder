@@ -32,6 +32,10 @@
         color: #fff;
     }
 
+    .questionContainer {
+        margin-top: 35px;
+    }
+
     .box {
         -webkit-box-shadow: 0 2px 1px #777;
         -moz-box-shadow: 0 2px 1px #777;
@@ -84,4 +88,8 @@
 
     .questionContainer {
         height: 60px;
+    }
+
+    .modal-header {
+        height: 120px;
     }
