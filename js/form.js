@@ -77,6 +77,7 @@ $(document).ready(function() {
             option_id: $(details).attr("data-option-id"),
             option_value: $(details).val(),
         }
+        console.log(obj);
         formData.append("data", JSON.stringify(obj));
         $.ajax({
             url: "ajax/dbfunctions.ajax.php",
@@ -112,8 +113,10 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
+                console.log(obj);
                 if (obj.status == "ok") {
-                    console.log(obj.data);
+                    var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + qid + '" data-option-id="' + obj.data + '" type="text" class="form-control additionalOption" value=""><span data-option-id="" class="optionRemove hover"> x </span></div></div>';
+                    $('.optionContainer').attr('data-options-container-id', qid).append(html);
                 }
             },
         })
@@ -229,7 +232,7 @@ $(document).ready(function() {
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
                 if (obj.status == "ok") {
-                    var optionContainer = $('<div class="optionContainer"></div>');
+                    var optionContainer = $('<div  data-options-container-id="' + qid + '" class="optionContainer"></div>');
                     $.each(obj.data, function(i, v) {
 
                         var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + v['question_id'] + '" data-option-id="' + v['id'] + '" type="text" class="form-control additionalOption" value="' + v['answer_option'] + '"><span data-option-id="' + v['id'] + '" class="optionRemove hover"> x </span></div></div>';
@@ -238,7 +241,8 @@ $(document).ready(function() {
                         $('.optionContainer').append(html);
 
                     })
-                    var addText = '<i class="fa fa-plus hover addOption" aria-hidden="true"></i>';
+
+                    var addText = '<i data-question-id="' + qid + '" class="fa fa-plus hover addOption" aria-hidden="true"></i>';
                     optionContainer.append(addText);
                 }
             }
