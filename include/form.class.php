@@ -13,13 +13,9 @@ class Form
         $this->action = $action;
         $this->method = $method;
        
-
         $questionSet = $this->getQuestionSet($this->questionSetId);
-         $this->title = $questionSet[0]['question_set_name'];
-
-        $questionsWithOptions = $this->getOptions($questionSet);
-
-        $this->buildForm($questionsWithOptions);
+        $this->title = $questionSet[0]['question_set_name'];
+        $this->buildForm($this->getOptions($questionSet));
 
 
     }
@@ -29,13 +25,31 @@ class Form
         foreach ($questions as $question){
             switch ($question['input_type']) {
                 case 'select':
-
                     $dropDown = new DropDownElement($question['question'],  'select_'. $question['id'] .'',  'select_'. $question['id'] .''); 
                     foreach ($question['options'] as $key => $value) {
                         $dropDown->addAttribute($value, $value);
                     }
                     $this->addElement($dropDown);
 
+                    break;
+
+
+                case 'checkbox':
+                    $checkbox = new CheckboxElement($question['question'],  'checkbox_'. $question['id'] .'',  'checkbox_'. $question['id'] .''); 
+                    foreach ($question['options'] as $key => $value) {
+                        $checkbox->addAttribute($value, $value);
+                    }
+                    $this->addElement($checkbox);
+
+                    break;
+
+                 case 'radio':
+                    $radio = new RadioButtonElement($question['question'], 'radio'. $question['id'] .'',  'radio_'. $question['id'] .''); 
+                    foreach ($question['options'] as $key => $value) {
+                        $radio->addAttribute($value, $value);
+                    }
+                    $this->addElement($radio);
+                    
                     break;
 
                 case 'text':
@@ -112,7 +126,7 @@ class Form
         {
             $elements .= $element->build();
         }
-        return '<div class="container"><h2>'.$this->title.'</h2><form action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . ' </form></div>';
+        return '<div class="container"><h2>'.$this->title.'</h2><form action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . '  <button type="submit" class="btn btn-primary">Submit form</button></form></div>';
     }
 }
 
@@ -170,10 +184,34 @@ class TextArea extends FormElement
         }
 
        $text .=  '<textarea class="form-control" '.$atttributes.'></textarea>';
+       $text .= "</div>";
        return $text;
     }
 }
 
+class CheckboxElement extends FormElement
+{
+     public function __construct($question, $name, $id)
+    {   
+        $this->question = $question;
+        $this->name = $name;
+        $this->id = $id;
+      
+
+    }
+    public function build()
+    {
+
+        $atttributes= "";
+        $text = '<label>' . $this->question . '</label>';
+        foreach ($this->atttributes as $val => $name)
+        {
+            $atttributes .= '<div class="checkbox"><label><input type="checkbox" id="'. $this->id .'"  value="'. $val .'">'. $name .'</label></div>';
+        }
+       $text.= $atttributes;
+       return $text;
+    }
+}
 
 class RadioButtonElement extends FormElement
 {
@@ -187,11 +225,12 @@ class RadioButtonElement extends FormElement
     }
     public function build()
     {
+
     	$atttributes= "";
-    	$text = '<p>' . $this->question . '</p>';
+    	$text = '<label>' . $this->question . '</label>';
         foreach ($this->atttributes as $val => $name)
         {
-            $atttributes .= '<div class="radio"><label><input type="radio" name="'. $name .'"  value="'. $val .'"></label></div>';
+            $atttributes .= '<div class="radio"><label><input type="radio" name="'. $this->id .'"  value="'. $val .'">'. $name .'</label></div>';
         }
        $text.= $atttributes;
        return $text;
@@ -212,7 +251,7 @@ class DropDownElement extends FormElement
     public function build()
     {
     	$atttributes= "";
-    	$text = '<p>' . $this->question . '</p>';
+    	$text = '<label>' . $this->question . '</label>';
         foreach ($this->atttributes as $val => $name)
         {
             $atttributes .= '<option class="form-control" value='. $val .'>'.$name.'</option>';
