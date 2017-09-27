@@ -7,16 +7,99 @@ class Form
     
     private $elements = array();
     
-    public function __construct($action, $method = 'post')
+    public function __construct($questionSetId, $action = "send.php", $method = 'post')
     {
+        $this->questionSetId = $questionSetId;
         $this->action = $action;
         $this->method = $method;
+       
+
+        $questionSet = $this->getQuestionSet($this->questionSetId);
+         $this->title = $questionSet[0]['question_set_name'];
+
+        $questionsWithOptions = $this->getOptions($questionSet);
+
+        $this->buildForm($questionsWithOptions);
+
 
     }
     
+
+    public function buildForm($questions){
+        foreach ($questions as $question){
+            switch ($question['input_type']) {
+                case 'select':
+
+                    $dropDown = new DropDownElement($question['question'],  'select_'. $question['id'] .'',  'select_'. $question['id'] .''); 
+                    foreach ($question['options'] as $key => $value) {
+                        $dropDown->addAttribute($value, $value);
+                    }
+                    $this->addElement($dropDown);
+
+                    break;
+                case 'text':
+                    $textElement = new TextFormElement($question['question']);
+                    $textElement->addAttribute('name', 'textfield_'. $question['id'] .'');
+                    $this->addElement($textElement);
+                break;
+
+                case 'textarea':
+                    $textArea = new TextArea($question['question']);
+                    $textArea->addAttribute('name', 'textarea_'. $question['id'] .'');
+                    $this->addElement($textArea);
+                break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
+        }
+       echo $this->build();
+
+    }
+
     public function addElement(FormElement $element)
     {
         $this->elements[] = $element;
+    }
+
+
+    public function getQuestionSet($setId)
+    {
+
+        $query = "SELECT * FROM questions JOIN nameids ON questions.question_set = nameids.question_set_id  WHERE nameids.question_set_id = '$setId'";
+
+        $result = pg_query($query); 
+        if ($result){
+            $data = array();
+            while ($row = pg_fetch_assoc($result)) {
+            array_push($data, $row);
+            }
+        }else{
+            return false;
+        }   
+        return $data;
+
+    }
+
+    public function getOptions($questionSet)
+    {
+
+        $completeQuestions = array();
+        foreach($questionSet as $question){
+
+            $query = "SELECT answer_option FROM options WHERE question_id = {$question['id']}";
+            $result = pg_query($query); 
+            $options = array();
+            while ($row = pg_fetch_assoc($result)) {
+                array_push($options, $row['answer_option']);
+            }
+            $question['options'] = $options;
+            $completeQuestions[] = $question;
+         }
+
+            return $completeQuestions;
     }
     
     public function build()
@@ -26,7 +109,7 @@ class Form
         {
             $elements .= $element->build();
         }
-        return '<form action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . ' </form>';
+        return '<div class="container"><h2>'.$this->title.'</h2><form action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . ' </form></div>';
     }
 }
 
@@ -54,13 +137,15 @@ class TextFormElement extends FormElement
     public function build()
     {
     	$atttributes= "";
-    	$text = '<p>' . $this->question . '</p>';
+        $text = "<div class='form-group'>";
+    	$text .= '<label>' . $this->question . '</label>';
         foreach ($this->atttributes as $name => $val)
         {
             $atttributes .= $name .'="'.$val.'"';
         }
         
-        $text .=  '<input type="text" '.$atttributes.'/>';
+        $text .=  '<input class="form-control" type="text" '.$atttributes.'/>';
+        $text .= "</div>";
        	return $text;
     }
 }
@@ -74,13 +159,14 @@ class TextArea extends FormElement
 	 public function build()
     {
     	$atttributes= "";
-    	$text = '<p>' . $this->question . '</p>';
+    	 $text = "<div class='form-group'>";
+        $text .= '<label>' . $this->question . '</label>';
         foreach ($this->atttributes as $name => $val)
         {
             $atttributes .= $name .'="'.$val.'"';
         }
 
-       $text .=  '<textarea '.$atttributes.'></textarea>';
+       $text .=  '<textarea class="form-control" '.$atttributes.'></textarea>';
        return $text;
     }
 }
@@ -126,7 +212,7 @@ class DropDownElement extends FormElement
     	$text = '<p>' . $this->question . '</p>';
         foreach ($this->atttributes as $val => $name)
         {
-            $atttributes .= '<option value='. $val .'>'.$name.'</option>';
+            $atttributes .= '<option class="form-control" value='. $val .'>'.$name.'</option>';
         }
        $text.= '<select id="'. $this->id .'" name="'. $this->selectName .'">'. $atttributes . '</select>';
        return $text;
