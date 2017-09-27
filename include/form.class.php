@@ -37,17 +37,20 @@ class Form
                     $this->addElement($dropDown);
 
                     break;
+
                 case 'text':
                     $textElement = new TextFormElement($question['question']);
                     $textElement->addAttribute('name', 'textfield_'. $question['id'] .'');
                     $this->addElement($textElement);
-                break;
+                
+                    break;
 
                 case 'textarea':
                     $textArea = new TextArea($question['question']);
                     $textArea->addAttribute('name', 'textarea_'. $question['id'] .'');
                     $this->addElement($textArea);
-                break;
+                    
+                    break;
                 
                 default:
                     # code...
@@ -188,7 +191,7 @@ class RadioButtonElement extends FormElement
     	$text = '<p>' . $this->question . '</p>';
         foreach ($this->atttributes as $val => $name)
         {
-            $atttributes .= '<input type="radio" name="'. $name .'"  value="'. $val .'">';
+            $atttributes .= '<div class="radio"><label><input type="radio" name="'. $name .'"  value="'. $val .'"></label></div>';
         }
        $text.= $atttributes;
        return $text;
@@ -214,7 +217,7 @@ class DropDownElement extends FormElement
         {
             $atttributes .= '<option class="form-control" value='. $val .'>'.$name.'</option>';
         }
-       $text.= '<select id="'. $this->id .'" name="'. $this->selectName .'">'. $atttributes . '</select>';
+       $text.= '<select class="form-control" id="'. $this->id .'" name="'. $this->selectName .'">'. $atttributes . '</select>';
        return $text;
     }
 }
