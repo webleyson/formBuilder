@@ -18,6 +18,22 @@ $(document).ready(function() {
         getQuestionSets();
     })
 
+
+    $('#questionnaireForm').on('click', '.ordering span', function() {
+        var positionValue = $(this).parent().parent().attr("data-question-position");
+        var theDiv = $(this).parent().parent();
+        if ($(this).hasClass('moveDown')) {
+            var orderValue = parseFloat(positionValue) + Number(1);
+            $(theDiv).next().attr("data-question-position", orderValue - Number(1));
+        } else {
+            var orderValue = parseFloat(positionValue) - Number(1);
+            $(theDiv).prev().attr("data-question-position", orderValue + Number(1));
+        }
+        $(this).parent().parent().attr("data-question-position", orderValue);
+        updatePositions($('#formTitle').attr('data-question-set'));
+    });
+
+
     $('#newQuestionSet').click(function() {
         createNewSet();
     })
@@ -53,6 +69,38 @@ $(document).ready(function() {
 
     function hideOptions(qid) {
         $('.optionContainer').attr('data-options-container-id', qid).slideUp();
+    }
+
+    function updatePositions(questionSet) {
+
+        var $questions = $('ul#questionnaireForm'),
+            $questionsli = $questions.children('li');
+
+
+        $questionsli.sort(function(a, b) {
+            var an = a.getAttribute('data-question-position');
+            bn = b.getAttribute('data-question-position');
+
+            if (an > bn) {
+                return 1;
+            }
+
+            if (an < bn) {
+                return -1;
+            }
+
+            return 0;
+        })
+        $questionsli.detach().appendTo($questions);
+        renumberElements($questionsli);
+        updateForm();
+    }
+
+    function renumberElements($questionsli) {
+        $.each($questionsli, function(i, v) {
+            //console.log(i + ":::" + v.getAttribute('data-question-position'));
+            v.setAttribute("data-question-position", i);
+        });
 
     }
 
@@ -159,9 +207,8 @@ $(document).ready(function() {
                     qForm.empty();
 
                     $.each(obj.data, function(i, v) {
-                        console.log(v);
-                        $html = '<div id="row_' + v['id'] + '" class="row questionContainer"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""><a data-question-id="' + v['id'] + '"  class="remove hover">Remove Question</a></div>';
-                        $html += '<div class="col-md-3"><select id="SelectBox_' + v['id'] + '"data-question-id="' + v['id'] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
+                        $html = '<li data-question-position="' + v['position'] + '" id="row_' + v['id'] + '" class="row questionContainer"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9 extraSpacingBottom"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""><a data-question-id="' + v['id'] + '"  class="remove hover">Remove Question</a></div>';
+                        $html += '<div class="col-md-3"><select id="SelectBox_' + v['id'] + '"data-question-id="' + v['id'] + '" name="replyOption" class="form-control replyOption addToDB"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div><div class="pull-right ordering"><span class="hover moveDown"><i class="fa fa-angle-down" aria-hidden="true"></i></span><span class="moveUp hover"><i class="fa fa-angle-up" aria-hidden="true"></i></span></div> </li>';
                         $(qForm).append($html);
 
 
@@ -176,6 +223,9 @@ $(document).ready(function() {
                     $('#formTitle').attr('data-question-set', obj.data[0]['question_set_id']);
                     selectDropDown(obj.data);
                     showHideOptions(obj.data);
+                    var $questions = $('ul#questionnaireForm'),
+                        $questionsli = $questions.children('li');
+                    renumberElements($questionsli);
 
                 }
             },
@@ -198,16 +248,15 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
-                console.log(obj);
                 if (obj.status == "ok") {
-                    var optionContainer = $('<div data-options-container-id="' + qid + '" class="optionContainer"></div>');
+                    var optionContainer = $('<div data-options-container-id="' + qid + '" class="col-xs-12 optionContainer"></div>');
+
                     $.each(obj.data, function(i, v) {
 
                         var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + v['question_id'] + '" data-option-id="' + v['id'] + '" type="text" class="form-control additionalOption" value="' + v['answer_option'] + '"><span data-option-id="' + v['id'] + '" class="optionRemove hover"> x </span></div></div>';
-                        $("#row_" + v['question_id'] + "").after(optionContainer);
+                        $("#row_" + v['question_id'] + "").append(optionContainer);
 
                         $(optionContainer).append(html);
-
                     })
 
                     var addText = '<i data-question-id="' + qid + '" class="fa fa-plus hover addOption" aria-hidden="true"></i>';
@@ -241,8 +290,8 @@ $(document).ready(function() {
 
     function addField() {
 
-        $html = '<div class="row questionContainer"><input class="rowContainer" type="hidden" name="rowContainer"><div class="col-md-9"><input placeholder="Ask your question" class="form-control question" type="text" name="question"><a class="remove">Remove Question</a></div>';
-        $html += '<div class="col-md-3"><select name="replyOption" class="form-control replyOption"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div></div>';
+        $html = '<li class="row questionContainer"><input class="rowContainer" type="hidden" name="rowContainer"><div class="col-md-9 extraSpacingBottom"><input placeholder="Ask your question" class="form-control question" type="text" name="question"><a class="remove">Remove Question</a></div>';
+        $html += '<div class="col-md-3"><select name="replyOption" class="form-control replyOption"><option value="text">Text Box</option><option value="textarea">Text Area</option><option value="select">Dropdown</option><option value="radio">Radio</option><option value="checkbox">Checkbox</option></select></div><div class="pull-right ordering"><span class="hover moveDown"><i class="fa fa-angle-down" aria-hidden="true"></i></span><span class="hover moveUp"><i class="fa fa-angle-up" aria-hidden="true"></i></span></div> </li>';
 
         $('#questionnaireForm').append($html);
 
@@ -273,7 +322,10 @@ $(document).ready(function() {
     });
 
     $('#questionnaireForm').on('change', '.question, .replyOption', function() {
+        updateForm();
+    });
 
+    function updateForm() {
         var qSet = new Array();
         var formData = new FormData();
         var obj = {};
@@ -285,7 +337,8 @@ $(document).ready(function() {
                 question: $(this).find('.question').val(),
                 replyType: $(this).find('.replyOption').val(),
                 question_id: $(this).find('.rowContainer').val(),
-                question_set_id: $('#formTitle').attr("data-question-set")
+                question_set_id: $('#formTitle').attr("data-question-set"),
+                position: $(this).attr('data-question-position'),
             };
             qSet.push(obj);
         });
@@ -309,7 +362,7 @@ $(document).ready(function() {
         }
 
 
-    });
+    }
 
     function addSelectOption(qid) {
         createAndGetOptionId(qid);

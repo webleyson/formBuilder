@@ -6,7 +6,10 @@
         height: 34px !important;
     }
 
-
+    ul {
+        list-style: none;
+        padding: 0;
+    }
 
     #questionSets ul {
         padding: 0;
@@ -33,7 +36,9 @@
     }
 
     .questionContainer {
-        margin-top: 35px;
+        padding-top: 15px;
+        background: antiquewhite;
+        margin: 15px 0;
     }
 
     .box {
@@ -55,6 +60,12 @@
         cursor: pointer;
     }
 
+    .ordering {
+        font-size: 22px;
+        margin-right: 10px;
+    }
+
+
     a.form_delete {
         background-color: pink !important;
         position: absolute;
@@ -62,6 +73,10 @@
         top: 0;
         height: auto;
         width: auto;
+    }
+
+    .extraSpacingBottom {
+        height: 60px;
     }
 
     a.remove {
@@ -86,9 +101,6 @@
         font-size: 23px;
     }
 
-    .questionContainer {
-        height: 60px;
-    }
 
     .modal-header {
         height: 120px;

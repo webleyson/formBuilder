@@ -29,7 +29,7 @@ include('include/layout/header.php');
                 </div>
                 <div class="modal-body">
                   <div class="container-fluid">
-                   <div id="questionnaireForm"></div>
+                   <ul id="questionnaireForm"></ul>
                    
                    <input type="hidden" id="formDataSet">
                   </div>
