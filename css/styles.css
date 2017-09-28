@@ -85,7 +85,7 @@
     }
 
     .optionContainer {
-        padding: 10px;
+        padding: 10px 10px 25px 10px;
         background: floralwhite;
     }
 
@@ -101,6 +101,11 @@
         font-size: 23px;
     }
 
+    .addOption {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+    }
 
     .modal-header {
         height: 120px;

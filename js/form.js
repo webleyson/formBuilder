@@ -9,50 +9,53 @@ $(document).ready(function() {
         $(this).find(".remove").hide();
     });
 
-    $('#questionnaireForm').on('click', '.remove', function() {
-        deleteQuestion($(this).attr("data-question-id"));
+    $('#questionnaireForm').on('click', '.remove', function(e) {
+        e.preventDefault();
+        if (confirm("Do you really want to remove this question?")) {
+            deleteQuestion($(this).attr("data-question-id"));
+        } else {
+            alert('Question not deleted');
+            return false;
+        }
+
     });
 
     $('#addForm').on('hidden.bs.modal', function() {
         $('.modal-body #questionnaireForm').empty();
         getQuestionSets();
-    })
-
-
-    $('#questionnaireForm').on('click', '.ordering span', function() {
-        var positionValue = $(this).parent().parent().attr("data-question-position");
-        var theDiv = $(this).parent().parent();
-        if ($(this).hasClass('moveDown')) {
-            var orderValue = parseFloat(positionValue) + Number(1);
-            $(theDiv).next().attr("data-question-position", orderValue - Number(1));
-        } else {
-            var orderValue = parseFloat(positionValue) - Number(1);
-            $(theDiv).prev().attr("data-question-position", orderValue + Number(1));
-        }
-        $(this).parent().parent().attr("data-question-position", orderValue);
-        updatePositions($('#formTitle').attr('data-question-set'));
     });
 
+    $('#questionnaireForm').on('click', '.ordering span', function() {
+        updateOrdering($(this));
+    });
 
     $('#newQuestionSet').click(function() {
         createNewSet();
-    })
+    });
 
     $('.createQuestion').click(function() {
         addField();
-    })
+    });
 
-    $('#questionnaireForm').on('click', '.optionRemove', function() {
-        deleteOption($(this).attr("data-option-id"));
-    })
+    $('#questionnaireForm').on('click', '.optionRemove', function(e) {
+        e.preventDefault();
+        if (confirm("Do you really want to remove this option?")) {
+            deleteOption($(this).attr("data-option-id"));
+        } else {
+            alert('Option not deleted');
+            return false;
+        }
+
+    });
 
     $('#questionnaireForm').on('click', '.addOption', function() {
         addSelectOption($(this).attr('data-question-id'));
-    })
+    });
 
     $('#questionSets').on('click', '.loadExistingForm', function() {
         populateExistingForm($(this).attr("data-question-set-id"));
-    })
+    });
+
     $('#questionSets').on('click', '.form_delete', function(e) {
         e.preventDefault();
         if (confirm("Delete Question set?")) {
@@ -61,11 +64,25 @@ $(document).ready(function() {
             alert('Question set not deleted');
             return false;
         }
-    })
+    });
 
     $('#questionnaireForm').on('change', '.additionalOption', function() {
         addNewOption($(this));
-    })
+    });
+
+    function updateOrdering(el) {
+        var positionValue = el.parent().parent().attr("data-question-position");
+        var theDiv = el.parent().parent();
+        if (el.hasClass('moveDown')) {
+            var orderValue = parseFloat(positionValue) + Number(1);
+            $(theDiv).next().attr("data-question-position", orderValue - Number(1));
+        } else {
+            var orderValue = parseFloat(positionValue) - Number(1);
+            $(theDiv).prev().attr("data-question-position", orderValue + Number(1));
+        }
+        el.parent().parent().attr("data-question-position", orderValue);
+        updatePositions($('#formTitle').attr('data-question-set'));
+    }
 
     function hideOptions(qid) {
         $('.optionContainer').attr('data-options-container-id', qid).slideUp();
@@ -101,7 +118,6 @@ $(document).ready(function() {
             //console.log(i + ":::" + v.getAttribute('data-question-position'));
             v.setAttribute("data-question-position", i);
         });
-
     }
 
     function addNewOption(details) {
@@ -127,8 +143,6 @@ $(document).ready(function() {
             }
         })
     }
-
-
 
     function deleteOption(optionId) {
 
@@ -215,14 +229,12 @@ $(document).ready(function() {
                         var optionsArray = ["text", 'textarea'];
                         if (optionsArray.indexOf(v.input_type) == -1) {
                             getAdditionalOptions(v['id']);
-
                         }
                     });
 
                     $('#formTitle').val(obj.data[0]['question_set_name']);
                     $('#formTitle').attr('data-question-set', obj.data[0]['question_set_id']);
                     selectDropDown(obj.data);
-                    showHideOptions(obj.data);
                     var $questions = $('ul#questionnaireForm'),
                         $questionsli = $questions.children('li');
                     renumberElements($questionsli);
@@ -251,16 +263,24 @@ $(document).ready(function() {
                 if (obj.status == "ok") {
                     var optionContainer = $('<div data-options-container-id="' + qid + '" class="col-xs-12 optionContainer"></div>');
 
-                    $.each(obj.data, function(i, v) {
+                    if (obj.data.length === 0) {
+                        $("#row_" + qid + "").append(optionContainer);
 
-                        var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + v['question_id'] + '" data-option-id="' + v['id'] + '" type="text" class="form-control additionalOption" value="' + v['answer_option'] + '"><span data-option-id="' + v['id'] + '" class="optionRemove hover"> x </span></div></div>';
-                        $("#row_" + v['question_id'] + "").append(optionContainer);
+                    } else {
 
-                        $(optionContainer).append(html);
-                    })
+                        $.each(obj.data, function(i, v) {
+                            var formValue = v['answer_option'] ? v['answer_option'] : "";
+                            var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + v['question_id'] + '" data-option-id="' + v['id'] + '" type="text" placeholder="Add option" class="form-control additionalOption" value="' + formValue + '"><span data-option-id="' + v['id'] + '" class="optionRemove hover"> x </span></div></div>';
+                            $("#row_" + v['question_id'] + "").append(optionContainer);
+
+                            $(optionContainer).append(html);
+                        })
+
+                    }
 
                     var addText = '<i data-question-id="' + qid + '" class="fa fa-plus hover addOption" aria-hidden="true"></i>';
                     optionContainer.append(addText);
+
                 }
             }
         })
@@ -273,15 +293,6 @@ $(document).ready(function() {
         })
     }
 
-    function showHideOptions(obj) {
-        console.log(obj);
-        var optionsArray = ["text", 'textarea'];
-        $.each(obj, function(k, v) {
-            if (optionsArray.indexOf(v.input_type) != -1) {
-                $('.optionContainer[data-options-container-id=246]').slideUp();
-            }
-        })
-    }
 
     function popSuccess($response) {
         $('.messageUpdate').html("Question Saved....");
@@ -347,6 +358,7 @@ $(document).ready(function() {
         formData.append("data", JSON.stringify(qSet));
         ajaxUpdate(formData);
 
+
         switch (this.value) {
             default: hideOptions($(this).attr('data-question-id'));
             break;
@@ -369,6 +381,7 @@ $(document).ready(function() {
     }
 
     function createAndGetOptionId(qid) {
+
         var formData = new FormData();
         formData.append("question_id", qid);
         formData.append('do', 'createAndGetOptionId');
@@ -383,8 +396,7 @@ $(document).ready(function() {
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
                 if (obj.status == "ok") {
-
-                    var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + qid + '" data-option-id="' + obj.data + '" type="text" class="form-control additionalOption" value=""><span data-option-id="" class="optionRemove hover"> x </span></div></div>';
+                    var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + qid + '" data-option-id="' + obj.data + '" type="text" class="form-control additionalOption" placeholder="Add option" value=""><span data-option-id="" class="optionRemove hover"> x </span></div></div>';
                     $('*[data-options-container-id="' + qid + '"]').append(html);
                 }
             },
