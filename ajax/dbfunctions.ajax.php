@@ -1,9 +1,7 @@
 <?php 
 require_once('../include/connectDB.php'); 
 require_once('../include/generic_functions.php'); 
-
 $do = isset($_POST['do']) ? $_POST['do'] : false;
-
 switch($do){
 	default:
         json_response("error", "Invalid Request");
@@ -44,9 +42,55 @@ switch($do){
 	case 'deleteQuestion':
 		deleteQuestion();
 		break;
+	case 'formAnswers':
+		saveAnswers();
+		break;
 
 }
 
+
+function saveAnswers(){
+	$userId = isset($_POST['userId']) ? $_POST['userId'] : false;
+	$data = isset($_POST['data']) ? $_POST['data'] : false;
+	$questionId = substr($data[0]['name'], strpos($data[0]['name'], "_") + 1);
+	$arr = array();
+	foreach ($data as $k => $v){
+		if (!array_key_exists($v['name'], $arr)) {
+        	$arr[$v['name']] = $v['value'];
+    	}else{
+          $arr[$v['name']] .=  ", " .$v['value'];
+    	}
+	}
+
+	$arr = cleanMe($arr);
+
+
+	$query = "SELECT id FROM answers WHERE question_id = $questionId AND  USER_ID = $userId";
+
+	$row = pg_fetch_assoc(pg_query($query));
+	if($row){
+		foreach ($arr as $value => $answer){
+			$id = substr($value, strpos($value, "_") + 1);
+			$query = "UPDATE answers SET ANSWER = $answer WHERE QUESTION_ID = $id AND USER_ID = $userId";
+			$result = pg_query($query);
+			$insert_row = pg_fetch_row($result);
+			
+		}
+		json_response('ok', 'Your answers have been updated');
+	}else{
+		foreach ($arr as $value => $answer){
+			$id = substr($value, strpos($value, "_") + 1);
+			$query = "INSERT INTO answers(answer, question_id, user_id) VALUES ($answer, $id, $userId)";
+			$result = pg_query($query);
+			$insert_row = pg_fetch_row($result);	
+			
+		}
+
+		json_response('ok', 'Your answers have been saved');
+	}
+
+
+}
 
 function getAdditionalOptions(){
 	$qid = json_decode($_POST['question_id']);
@@ -69,6 +113,7 @@ function getAdditionalOptions(){
 
 function createAndGetOptionId(){
 	$qid = json_decode($_POST['question_id']);
+	$qid = pg_escape_string($qid);
 	$query = "INSERT INTO options(QUESTION_ID) VALUES ('$qid') RETURNING id ";
 
 	$result = pg_query($query);
@@ -85,6 +130,7 @@ function createAndGetOptionId(){
 
 function updateOption(){
 	$details = json_decode($_POST['data']);
+
 	$query = "UPDATE options SET ANSWER_OPTION = '$details->option_value', QUESTION_ID = '$details->question_id' WHERE ID = '$details->option_id'";
 
 
@@ -177,12 +223,23 @@ function getAllQuestionSets(){
 	json_response('ok', 'New question set', $data);
 }
 
+function cleanMe($inputs){
+	$cleanData = array();
+	foreach ($inputs as $input => $value) {
+		 $cleanData[$input] = pg_escape_literal($value);
+	}
+return $cleanData;
+}
+
 function saveTitle(){
 	$details = json_decode($_POST['data']);
+
+	$details = cleanMe($details);
+	
 	if (isset($details->set_id)){
-		$query = "UPDATE nameids SET QUESTION_SET_NAME = '$details->title' WHERE QUESTION_SET_ID = '$details->set_id'";
+		$query = "UPDATE nameids SET QUESTION_SET_NAME = $details[title] WHERE QUESTION_SET_ID = '$details[set_id]'";
 	}else{
-		$query = "INSERT INTO nameids(QUESTION_SET_NAME) VALUES ('$details->title') RETURNING question_set_id";
+		$query = "INSERT INTO nameids(QUESTION_SET_NAME) VALUES ($details[title]) RETURNING question_set_id";
 	}
 		
 	$result = pg_query($query); 
@@ -200,22 +257,21 @@ function saveTitle(){
 
 
 function saveQuestion(){
-	$inputs = array();
 	$key = array();
 	$questions = json_decode($_POST['data']);
 
-	foreach($questions as $item => $value) {
+	foreach($questions as $item => $value){
 		$key[$item] = $value;
 	}
-		foreach ($key as $inputs) {
-
-			if($inputs->question_id==='null'){
-		    	$query = "INSERT INTO questions(QUESTION, INPUT_TYPE, POSITION, QUESTION_SET) VALUES ('$inputs->question', '$inputs->replyType', '$inputs->position' '$inputs->question_set_id')";
-			}else{
-				$query = "UPDATE questions SET QUESTION = '$inputs->question', INPUT_TYPE = '$inputs->replyType', POSITION = '$inputs->position', QUESTION_SET = '$inputs->question_set_id' WHERE ID = '$inputs->question_id'";
-			}
-			$result = pg_query($query); 
+	foreach ($key as $inputs) {
+		if($inputs->question_id==='null'){
+			
+	    	$query = "INSERT INTO questions(QUESTION, INPUT_TYPE, QUESTION_SET) VALUES ('$inputs->question', '$inputs->replyType',  '$inputs->question_set_id')";
+		}else{
+			$query = "UPDATE questions SET QUESTION = '$inputs->question', INPUT_TYPE = '$inputs->replyType', QUESTION_SET = '$inputs->question_set_id', POSITION = '$inputs->position' WHERE ID = '$inputs->question_id'";
 		}
+		$result = pg_query($query);
+	}
 	
 	if (!$result){
 		json_response('error', 'Unable to process question');

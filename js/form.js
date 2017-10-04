@@ -5,6 +5,7 @@ $(document).ready(function() {
     $('#questionnaireForm').on('mouseenter', '.questionContainer', function() {
         $(this).find(".remove").show();
     });
+
     $('#questionnaireForm').on('mouseleave', '.questionContainer', function() {
         $(this).find(".remove").hide();
     });
@@ -28,6 +29,22 @@ $(document).ready(function() {
     $('#questionnaireForm').on('click', '.ordering span', function() {
         updateOrdering($(this));
     });
+
+    $('#saveChanges').click(function() {
+        var $questions = $('ul#questionnaireForm'),
+            $questionsli = $questions.children('li');
+
+        removeRedundantData();
+    })
+
+    function removeRedundantData(questions) {
+        $('#questionnaireForm select').each(function() {
+            // do something
+            console.log($(this).attr("data-question-id") + "::" + $('option:selected', this).val());
+
+        });
+    }
+
 
     $('#newQuestionSet').click(function() {
         createNewSet();
@@ -69,6 +86,7 @@ $(document).ready(function() {
     $('#questionnaireForm').on('change', '.additionalOption', function() {
         addNewOption($(this));
     });
+
 
     function updateOrdering(el) {
         var positionValue = el.parent().parent().attr("data-question-position");
@@ -349,10 +367,11 @@ $(document).ready(function() {
                 replyType: $(this).find('.replyOption').val(),
                 question_id: $(this).find('.rowContainer').val(),
                 question_set_id: $('#formTitle').attr("data-question-set"),
-                position: $(this).attr('data-question-position'),
+                position: $(this).attr('data-question-position') ? $(this).attr('data-question-position') : 0,
             };
             qSet.push(obj);
         });
+
 
         formData.append('do', 'saveQuestion');
         formData.append("data", JSON.stringify(qSet));
@@ -381,7 +400,6 @@ $(document).ready(function() {
     }
 
     function createAndGetOptionId(qid) {
-
         var formData = new FormData();
         formData.append("question_id", qid);
         formData.append('do', 'createAndGetOptionId');
