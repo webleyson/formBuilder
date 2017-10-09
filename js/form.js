@@ -2,6 +2,32 @@ $(document).ready(function() {
 
     getQuestionSets();
 
+    function getQuestionSets() {
+        var formData = new FormData();
+        formData.append('do', 'getAllSets');
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                var obj = jQuery.parseJSON(response);
+                console.log(obj);
+                if (obj.status == "ok") {
+                    var questionDiv = $("#questionSets");
+                    questionDiv.empty();
+                    var list = $(questionDiv).append('<ul></ul>').find('ul');
+                    $.each(obj.data, function(i, v) {
+                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a></li>');
+                    });
+                }
+            },
+        })
+    }
+
     $('#questionnaireForm').on('mouseenter', '.questionContainer', function() {
         $(this).find(".remove").show();
     });
@@ -484,29 +510,5 @@ $(document).ready(function() {
         })
     }
 
-    function getQuestionSets() {
-        var formData = new FormData();
-        formData.append('do', 'getAllSets');
-        $.ajax({
-            url: "ajax/dbfunctions.ajax.php",
-            type: 'POST',
-            data: formData,
-            dataType: 'html',
-            processData: false,
-            contentType: false,
-            cache: false,
-            success: function(response) {
-                var obj = jQuery.parseJSON(response);
-                console.log(obj);
-                if (obj.status == "ok") {
-                    var questionDiv = $("#questionSets");
-                    questionDiv.empty();
-                    var list = $(questionDiv).append('<ul></ul>').find('ul');
-                    $.each(obj.data, function(i, v) {
-                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a></li>');
-                    });
-                }
-            },
-        })
-    }
+
 });

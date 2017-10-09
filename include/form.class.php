@@ -1,3 +1,5 @@
+
+<?php include('db.class.php');?>
 <?php
 class Form
 {

@@ -1,11 +1,17 @@
 <?php 
 require_once('../include/connectDB.php'); 
 require_once('../include/generic_functions.php'); 
+require_once('../include/db.class.php');
+define("SITE_ID", 1);
+
 $do = isset($_POST['do']) ? $_POST['do'] : false;
 switch($do){
 	default:
         json_response("error", "Invalid Request");
         break;
+    case 'getAllSets':
+		getAllQuestionSets();
+		break;
     case 'saveQuestion':
         saveQuestion();
         break;
@@ -21,9 +27,7 @@ switch($do){
 	case 'getExisting':
 	    getExisting();
 	   	break;
-	case 'getAllSets':
-		getAllQuestionSets();
-		break;
+
 	case 'deleteForm':
 		deleteFormAndAssociatedQuestions();
 		break;
@@ -47,6 +51,59 @@ switch($do){
 		break;
 
 }
+
+function getAllQuestionSets(){
+	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, count(questions.question_set) FROM nameids LEFT JOIN questions ON nameids.question_set_id = questions.question_set GROUP BY nameids.question_set_name, nameids.question_set_id";
+
+	$query = DB::query($sql, false);
+	
+	if ($query->rowCount()>0){
+		$data = array();
+		while($row = $query->fetchObject()){
+			array_push($data, $row);
+		}
+	}else{
+		json_response('ok', 'No sets exitst');
+		return;
+	}	
+	json_response('ok', 'New question set', $data);
+}
+
+function deleteFormAndAssociatedQuestions(){
+	$setId = json_decode($_POST['question_set_id']);
+
+	$sql = "DELETE FROM nameids WHERE question_set_id = '$setId'";
+	$query = DB::query($sql, false);
+
+	$select = "SELECT id FROM questions WHERE question_set = '$setId'";
+	$query = DB::query($select, false);
+	
+
+	if ($query->rowCount()>0){
+		$sql = "DELETE FROM questions WHERE question_set = '$setId'";
+		$query = DB::query($sql, false);
+	}
+
+	if($result){
+		json_response('ok', 'Form deleted', $result);
+	}else{
+		json_response('error', 'No sets exist');
+	}
+}
+
+function deleteOption(){
+	$optionId = json_decode($_POST['option_id']);
+	$sql = "DELETE FROM options WHERE id = '$optionId'";
+	$query = DB::query($sql, false);
+
+	if($result){
+		json_response('ok', 'Option deleted', $result);
+	}else{
+		json_response('error', 'Option doesnt exist');
+	}
+}
+
+
 
 
 function saveAnswers(){
@@ -88,8 +145,6 @@ function saveAnswers(){
 
 		json_response('ok', 'Your answers have been saved');
 	}
-
-
 }
 
 function getAdditionalOptions(){
@@ -145,17 +200,7 @@ function updateOption(){
 }
 
 
-function deleteOption(){
-	$optionId = json_decode($_POST['option_id']);
-	$query = "DELETE FROM options WHERE id = '$optionId'";
-	$result = pg_query($query);
 
-	if($result){
-		json_response('ok', 'Option deleted', $result);
-	}else{
-		json_response('error', 'Option doesnt exist');
-	}
-}
 
 function deleteQuestion(){
 	$questionId = json_decode($_POST['question_id']);
@@ -170,24 +215,7 @@ function deleteQuestion(){
 	}
 }
 
-function deleteFormAndAssociatedQuestions(){
-	$setId = json_decode($_POST['question_set_id']);
-	$query = "DELETE FROM nameids WHERE question_set_id = '$setId'";
-	$result = pg_query($query);
 
-	$select = "SELECT id FROM questions WHERE question_set = '$setId'";
-	$result = pg_query($query);
-	if ($result){
-		$query = "DELETE FROM questions WHERE question_set = '$setId'";
-		$result = pg_query($query);
-	}
-
-	if($result){
-		json_response('ok', 'Form deleted', $result);
-	}else{
-		json_response('error', 'No sets exist');
-	}
-}
 
 function getExisting(){
 	$setId = json_decode($_POST['question_set_id']);
@@ -206,22 +234,7 @@ function getExisting(){
 }
 
 
-function getAllQuestionSets(){
-	$query = "SELECT nameids.question_set_name, nameids.question_set_id, count(questions.question_set) FROM nameids LEFT JOIN questions ON nameids.question_set_id = questions.question_set GROUP BY nameids.question_set_name, nameids.question_set_id";
 
-	$result = pg_query($query); 
-	
-	if ($result){
-		$data = array();
-		while ($row = pg_fetch_assoc($result)) {
-			array_push($data, $row);
-		}
-	}else{
-		json_response('ok', 'No sets exitst');
-		return;
-	}	
-	json_response('ok', 'New question set', $data);
-}
 
 function cleanMe($inputs){
 	$cleanData = array();
