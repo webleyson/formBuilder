@@ -148,12 +148,12 @@ function saveTitle(){
 
 function getExisting(){
 	$setId = json_decode($_POST['question_set_id']);
-	$oldQuery = "SELECT * FROM questions RIGHT JOIN nameids ON questions.question_set = nameids.question_set_id  WHERE nameids.question_set_id = '$setId' ORDER BY position";
-	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, nameids.site_id, nameids.id AS nameId, questions.id, questions.question 
-			FROM nameids 
-			LEFT JOIN questions ON questions.question_set = nameids.question_set_id
-			WHERE nameids.question_set_id = '$setId' ORDER BY position";
 
+	$oldQuery = "SELECT * FROM questions RIGHT JOIN nameids ON questions.question_set = nameids.question_set_id  WHERE nameids.question_set_id = '$setId' ORDER BY position";
+	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, nameids.site_id, nameids.id AS nameId, questions.id, questions.input_type, questions.question 
+			FROM nameids 
+			LEFT JOIN questions ON questions.question_set = nameids.question_set_id 
+			WHERE nameids.question_set_id = '$setId' ORDER BY position";
 
 	$query = DB::query($sql, false);
 
@@ -324,18 +324,29 @@ function updateOption(){
 function createAndGetId(){
 	$inputs = array();
 	$qsid = json_decode($_POST['question_set_id']);
+	$data = array(
+				'question_set'	=> $qsid
+			);
 
-	$query = "INSERT INTO questions(QUESTION_SET) VALUES ('$qsid') RETURNING id, question_set, position ";
+	$result = DB::insert("questions", $data);
 
-	$result = pg_query($query); 
-	$insert_row = pg_fetch_row($result);
+	$sql = "SELECT * FROM questions WHERE id = $result";
+	$query = DB::query($sql, false);
+
+	if ($query->rowCount() > 0) {
+		$row = $query->fetchObject();
+		$data = array('last_row' => $row->id, 'question_set' => $row->question_set, 'position' => $row->position);
+		json_response('ok', 'Question set Created', $data);
+	}else{
+		echo "Error creating question";
+	}
 	
-	if (!$result){
+	/*if (!$result){
 		echo "Error creating question";
 	}else{
 		$data = array('last_row' => ($insert_row[0]), 'question_set' => ($insert_row[1]), 'position' => ($insert_row[2]));
 		json_response('ok', 'Question set Created', $data);
-	}	
+	}*/	
 }
 
 ?>

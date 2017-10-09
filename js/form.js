@@ -400,6 +400,7 @@ $(document).ready(function() {
             qSet.push(obj);
         });
 
+
         formData.append('do', 'saveQuestion');
         formData.append("data", JSON.stringify(qSet));
         ajaxUpdate(formData);
@@ -461,7 +462,7 @@ $(document).ready(function() {
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
                 popSuccess(response);
-                populateExistingForm(obj.data.question_set_id);
+                populateExistingForm(obj.data.question_set);
             },
         })
     }

@@ -99,7 +99,8 @@ class DB {
         }
 
 
-        $qry = self::query($sql, false);
+        $qry = self::query($sql, $checkSite);
+
         if ($qry !== false) {
             return $qry->rowCount();
         }
