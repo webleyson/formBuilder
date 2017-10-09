@@ -263,6 +263,7 @@ $(document).ready(function() {
                 if (obj.status == "ok") {
                     var qForm = $('#questionnaireForm');
                     qForm.empty();
+                    console.log(obj);
 
                     $.each(obj.data, function(i, v) {
                         $html = '<li data-question-position="' + v['position'] + '" id="row_' + v['id'] + '" class="row questionContainer"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9 extraSpacingBottom"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""><a data-question-id="' + v['id'] + '"  class="remove hover">Remove Question</a></div>';
@@ -311,6 +312,7 @@ $(document).ready(function() {
                         $("#row_" + qid + "").append(optionContainer);
 
                     } else {
+                        console.log(obj);
 
                         $.each(obj.data, function(i, v) {
                             var formValue = v['answer_option'] ? v['answer_option'] : "";
@@ -397,7 +399,6 @@ $(document).ready(function() {
             };
             qSet.push(obj);
         });
-
 
         formData.append('do', 'saveQuestion');
         formData.append("data", JSON.stringify(qSet));
