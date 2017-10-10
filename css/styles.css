@@ -19,7 +19,7 @@
     #questionSets ul li {
         display: inline-block;
         border: 1px solid grey;
-        height: 150px;
+        height: 190px;
         width: 170px;
         margin-right: 20px;
         position: relative;
@@ -33,6 +33,8 @@
         text-align: center;
         background-color: #ffa500;
         color: #fff;
+        position: relative;
+        display: inline-block;
     }
 
     .questionContainer {

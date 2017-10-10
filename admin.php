@@ -17,32 +17,31 @@ include('include/layout/header.php');
       </div>
 
       <!-- Modal -->
-          <div class="modal fade" id="addForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                 <input id="formTitle" type="text"  name="formTitle" placeholder="Add a title">
-                  <div class="messageUpdate"></div>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <div class="container-fluid">
-                   <ul id="questionnaireForm"></ul>
-                   
-                   <input type="hidden" id="formDataSet">
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <i class="fa fa-plus fa-2x createQuestion pull-left hover" aria-hidden="true">Add Question</i>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="button" id="saveChanges" class="btn btn-primary">Save changes</button>
-                </div>
+      <div class="modal fade" id="addForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+             <input id="formTitle" type="text"  name="formTitle" placeholder="Add a title">
+              <div class="messageUpdate"></div>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="container-fluid">
+               <ul id="questionnaireForm"></ul>
+               
+               <input type="hidden" id="formDataSet">
               </div>
             </div>
+            <div class="modal-footer">
+              <i class="fa fa-plus fa-2x createQuestion pull-left hover" aria-hidden="true">Add Question</i>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" id="saveChanges" class="btn btn-primary">Save changes</button>
+            </div>
           </div>
-            	
+        </div>
+      </div>   	
 	</div>
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
