@@ -379,10 +379,10 @@ $(document).ready(function() {
     });
 
     $('#questionnaireForm').on('change', '.question, .replyOption', function() {
-        updateForm();
+        updateForm(this);
     });
 
-    function updateForm() {
+    function updateForm(selectVal) {
         var qSet = new Array();
         var formData = new FormData();
         var obj = {};
@@ -403,20 +403,23 @@ $(document).ready(function() {
 
         formData.append('do', 'saveQuestion');
         formData.append("data", JSON.stringify(qSet));
+
+
+
         ajaxUpdate(formData);
 
 
-        switch (this.value) {
-            default: hideOptions($(this).attr('data-question-id'));
+        switch (selectVal.value) {
+            default: hideOptions($(selectVal).attr('data-question-id'));
             break;
             case "select":
-                    addSelectOption($(this).attr('data-question-id'));
+                    addSelectOption($(selectVal).attr('data-question-id'));
                 break;
             case "radio":
-                    addSelectOption($(this).attr('data-question-id'));
+                    addSelectOption($(selectVal).attr('data-question-id'));
                 break;
             case "checkbox":
-                    addSelectOption($(this).attr('data-question-id'));
+                    addSelectOption($(selectVal).attr('data-question-id'));
                 break;
         }
 
@@ -442,8 +445,8 @@ $(document).ready(function() {
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
                 if (obj.status == "ok") {
-                    var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + qid + '" data-option-id="' + obj.data + '" type="text" class="form-control additionalOption" placeholder="Add option" value=""><span data-option-id="" class="optionRemove hover"> x </span></div></div>';
-                    $('*[data-options-container-id="' + qid + '"]').append(html);
+                    var html = '<div class="row"><div class="col-xs-12"><input data-question-id="' + obj.data.question_set_id + '" data-option-id="' + obj.data.id + '" type="text" class="form-control additionalOption" placeholder="Add option" value=""><span data-option-id="" class="optionRemove hover"> x </span></div></div>';
+                    $('*[data-options-container-id="' + obj.data.question_set_id + '"]').append(html);
                 }
             },
         })

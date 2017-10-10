@@ -84,7 +84,7 @@ function deleteFormAndAssociatedQuestions(){
 		$query = DB::query($sql, false);
 	}
 
-	if($result){
+	if($query){
 		json_response('ok', 'Form deleted', $result);
 	}else{
 		json_response('error', 'No sets exist');
@@ -96,7 +96,7 @@ function deleteOption(){
 	$sql = "DELETE FROM options WHERE id = '$optionId'";
 	$query = DB::query($sql, false);
 
-	if($result){
+	if($query){
 		json_response('ok', 'Option deleted', $result);
 	}else{
 		json_response('error', 'Option doesnt exist');
@@ -171,14 +171,13 @@ function getExisting(){
 
 function getAdditionalOptions(){
 	$qid = json_decode($_POST['question_id']);
-
 	$sql = "SELECT * FROM options WHERE question_id = '$qid'";
-
 	$query = DB::query($sql, false);
 
 	if ($query->rowCount()>0){
-		while($row = $query->fetchObject()){
 		$data = array();
+		while($row = $query->fetchObject()){
+		
 		array_push($data, $row);
 		}
 		json_response('ok', 'Additional Options', $data);
@@ -186,8 +185,6 @@ function getAdditionalOptions(){
 		json_response('error', 'No options exist', null);
 	}
 }
-
-
 
 function saveQuestion(){
 	$key = array();
@@ -223,9 +220,49 @@ function saveQuestion(){
 	}else{
         json_response('ok', 'Questions Updated', $data);
 	}
-
 }
 
+function createAndGetOptionId(){
+	$qid = json_decode($_POST['question_id']);
+	
+	$data = array(
+		'question_id' => $qid
+	);
+
+	$result = DB::insert("options", $data);
+
+	if($result){
+		$sql = "SELECT question_id FROM options WHERE id = '$result'";
+		$query = DB::query($sql, false);
+		if ($query->rowCount()>0){
+			while($row = $query->fetchObject()){
+				$data=array(
+					'question_set_id' 	=> $row->question_id,
+					'id'				=> $result,
+				);
+			}
+			json_response('ok', 'Additional option field', $data);
+		}
+	}else{
+		json_response('error', 'Cannot add option');   
+	}
+}
+
+function updateOption(){
+	$details = json_decode($_POST['data']);
+	$data = array(
+		'answer_option' 	=> $details->option_value,
+		'question_id'		=> $details->question_id,
+	);
+	$where = "id = {$details->option_id}";
+	$result = DB::update("options", $data, $where);
+
+	if (!$result){
+		echo json_response('error', 'Unable to save form title');
+	}else{
+        json_response('ok', 'Option added...',$result);
+	}
+}
 
 function deleteQuestion(){
 	$questionId = json_decode($_POST['question_id']);
@@ -285,38 +322,9 @@ function saveAnswers(){
 
 
 
-function createAndGetOptionId(){
-	$qid = json_decode($_POST['question_id']);
-	$qid = pg_escape_string($qid);
-	$query = "INSERT INTO options(QUESTION_ID) VALUES ('$qid') RETURNING id ";
-
-	$result = pg_query($query);
-	$insert_row = pg_fetch_row($result);
-
-	if (!$result){
-		echo json_response('error', 'Unable to save form title');
-	}else{
-
-        json_response('ok', 'Form title saved...',$insert_row[0]);
-	}
-}
 
 
-function updateOption(){
-	$details = json_decode($_POST['data']);
 
-	$query = "UPDATE options SET ANSWER_OPTION = '$details->option_value', QUESTION_ID = '$details->question_id' WHERE ID = '$details->option_id'";
-
-
-	$result = pg_query($query);
-	$insert_row = pg_fetch_row($result);
-
-	if (!$result){
-		echo json_response('error', 'Unable to save form title');
-	}else{
-        json_response('ok', 'Option added...',$insert_row[0]);
-	}
-}
 
 
 
