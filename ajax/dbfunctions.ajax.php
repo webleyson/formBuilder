@@ -49,7 +49,9 @@ switch($do){
 	case 'formAnswers':
 		saveAnswers();
 		break;
-
+	case 'deleteRedundantData':
+		deleteRedundantData();
+		break;
 }
 
 function getAllQuestionSets(){
@@ -110,8 +112,7 @@ function newFormSet(){
 
 	if ($query->rowCount()>0){
 		while($row = $query->fetchObject()){
-
-			$thisRow = $row[0];
+			$thisRow = $row->question_set_id;
 			$newRow = $thisRow +1;
 		  	json_response('ok', 'New question set', $newRow);
 		  }
@@ -278,6 +279,54 @@ function deleteQuestion(){
 }
 
 
+
+
+
+
+function deleteRedundantData(){
+	$idsToDelete = json_decode($_POST['data']);
+
+	$ids = implode(', ', $idsToDelete);
+
+	$query = "DELETE FROM options WHERE question_id IN ({$ids})";
+	$result = DB::query($query, false);
+	if($result){
+		json_response('ok', 'Your form is ready to go!', $result);
+	}else{
+		json_response('ok', 'Form is published', $result);
+	}
+}
+
+
+
+function createAndGetId(){
+	$inputs = array();
+	$qsid = json_decode($_POST['question_set_id']);
+	$data = array(
+				'question_set'	=> $qsid
+			);
+
+	$result = DB::insert("questions", $data);
+
+	$sql = "SELECT * FROM questions WHERE id = $result";
+	$query = DB::query($sql, false);
+
+	if ($query->rowCount() > 0) {
+		$row = $query->fetchObject();
+		$data = array('last_row' => $row->id, 'question_set' => $row->question_set, 'position' => $row->position);
+		json_response('ok', 'Question set Created', $data);
+	}else{
+		echo "Error creating question";
+	}
+	
+	/*if (!$result){
+		echo "Error creating question";
+	}else{
+		$data = array('last_row' => ($insert_row[0]), 'question_set' => ($insert_row[1]), 'position' => ($insert_row[2]));
+		json_response('ok', 'Question set Created', $data);
+	}*/	
+}
+
 function saveAnswers(){
 	$userId = isset($_POST['userId']) ? $_POST['userId'] : false;
 	$data = isset($_POST['data']) ? $_POST['data'] : false;
@@ -319,42 +368,5 @@ function saveAnswers(){
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-function createAndGetId(){
-	$inputs = array();
-	$qsid = json_decode($_POST['question_set_id']);
-	$data = array(
-				'question_set'	=> $qsid
-			);
-
-	$result = DB::insert("questions", $data);
-
-	$sql = "SELECT * FROM questions WHERE id = $result";
-	$query = DB::query($sql, false);
-
-	if ($query->rowCount() > 0) {
-		$row = $query->fetchObject();
-		$data = array('last_row' => $row->id, 'question_set' => $row->question_set, 'position' => $row->position);
-		json_response('ok', 'Question set Created', $data);
-	}else{
-		echo "Error creating question";
-	}
-	
-	/*if (!$result){
-		echo "Error creating question";
-	}else{
-		$data = array('last_row' => ($insert_row[0]), 'question_set' => ($insert_row[1]), 'position' => ($insert_row[2]));
-		json_response('ok', 'Question set Created', $data);
-	}*/	
-}
 
 ?>

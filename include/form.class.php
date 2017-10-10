@@ -16,8 +16,8 @@ class Form
         $this->method = $method;
         $this->userId = $userId;
         $questionSet = $this->getQuestionSet($this->questionSetId, $this->userId);
+        $this->title = $questionSet[0]->question_set_name;
 
-        $this->title = $questionSet[0]['question_set_name'];
         $this->buildForm($this->getOptions($questionSet));
       
     }
@@ -26,12 +26,13 @@ class Form
 
 
     public function buildForm($questions){
+
         foreach ($questions as $question){
 
-            switch ($question['input_type']) {
+            switch ($question->input_type) {
                 case 'select':
-                    $dropDown = new DropDownElement($question['question'],  'select_'. $question['id'] .'',  'select_'. $question['id'] .'', $question['answer']); 
-                    foreach ($question['options'] as $key => $value) {
+                    $dropDown = new DropDownElement($question->question,  'select_'. $question->id .'',  'select_'. $question->id .'', $question->answer); 
+                    foreach ($question->options as $key => $value) {
                         $dropDown->addAttribute($value, $value);
                     }
                     $this->addElement($dropDown);
@@ -40,7 +41,7 @@ class Form
 
 
                 case 'checkbox':
-                    $checkbox = new CheckboxElement($question['question'],  'checkbox_'. $question['id'] .'',  'checkbox_'. $question['id'] .'', $question['answer']); 
+                    $checkbox = new CheckboxElement($question->question,  'checkbox_'. $question->id .'',  'checkbox_'. $question->id .'', $question->answer);
                     foreach ($question['options'] as $key => $value) {
                         $checkbox->addAttribute($value, $value);
                     }
@@ -49,7 +50,7 @@ class Form
                     break;
 
                  case 'radio':
-                    $radio = new RadioButtonElement($question['question'], 'radio'. $question['id'] .'',  'radio_'. $question['id'] .'', $question['answer']);
+                    $radio = new RadioButtonElement($question->question, 'radio'. $question->id .'',  'radio_'. $question->id .'', $question->answer);
                     foreach ($question['options'] as $key => $value) {
                         $radio->addAttribute($value, $value);
                     }
@@ -59,15 +60,15 @@ class Form
 
                 case 'text':
 
-                    $textElement = new TextFormElement($question['question'], $question['answer']);
-                    $textElement->addAttribute('name', 'textfield_'. $question['id'] .'');
+                    $textElement = new TextFormElement($question->question, $question->answer);
+                    $textElement->addAttribute('name', 'textfield_'. $question->id .'');
                     $this->addElement($textElement);
                 
                     break;
 
                 case 'textarea':
-                    $textArea = new TextArea($question['question'], $question['answer']);
-                    $textArea->addAttribute('name', 'textarea_'. $question['id'] .'');
+                    $textArea = new TextArea($question->question, $question->answer);
+                    $textArea->addAttribute('name', 'textarea_'. $question->id .'');
                     $this->addElement($textArea);
                     
                     break;
@@ -91,18 +92,20 @@ class Form
     public function getQuestionSet($setId, $userId)
     {
 
-    $query = "SELECT DISTINCT questions.id, questions.question, questions.input_type, questions.position, questions.question_set, question_set_name, question_set_id, answer FROM questions LEFT JOIN nameids ON questions.question_set = nameids.question_set_id LEFT JOIN answers ON questions.id = answers.question_id WHERE nameids.question_set_id = '$setId' ORDER BY position";
-        $result = pg_query($query); 
-        
-        if ($result){
-            $data = array();
-            while ($row = pg_fetch_assoc($result)) {
-            array_push($data, $row);
+        $sql = "SELECT DISTINCT questions.id, questions.question, questions.input_type, questions.position, questions.question_set, question_set_name, question_set_id, answer FROM questions LEFT JOIN nameids ON questions.question_set = nameids.question_set_id LEFT JOIN answers ON questions.id = answers.question_id WHERE nameids.question_set_id = '$setId' ORDER BY position";
+       
+        $query = DB::query($sql, false);
+
+
+        if ($query->rowCount()>0){
+        $data = array();
+            while($row = $query->fetchObject()){
+                array_push($data, $row);
             }
+            return $data;
         }else{
             return false;
         }   
-        return $data;
 
     }
 
@@ -112,18 +115,28 @@ class Form
         $completeQuestions = array();
         foreach($questionSet as $question){
 
-            $query = "SELECT answer_option FROM options WHERE question_id = {$question['id']}";
-            $result = pg_query($query); 
-            $options = array();
-            while ($row = pg_fetch_assoc($result)) {
-                array_push($options, $row['answer_option']);
-            }
-            $question['options'] = $options;
-            $completeQuestions[] = $question;
-         }
+            $sql = "SELECT answer_option FROM options WHERE question_id = {$question->id}";
+            $query = DB::query($sql, false);
 
-            return $completeQuestions;
+            if ($query->rowCount()>0){
+                $options = array();
+
+                while($row = $query->fetchObject()){
+                    array_push($options, $row->answer_option);
+                }
+
+                $question->options = $options;
+                $completeQuestions[] = $question;
+            }else{
+                return false;
+            }
+
+           
     }
+     return $completeQuestions;
+}
+
+            
     
     public function build()
     {

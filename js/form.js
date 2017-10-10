@@ -56,19 +56,48 @@ $(document).ready(function() {
         updateOrdering($(this));
     });
 
-    $('#saveChanges').click(function() {
-        var $questions = $('ul#questionnaireForm'),
-            $questionsli = $questions.children('li');
 
-        removeRedundantData();
+    $('#saveChanges').click(function() {
+
+        checkRedundantData();
     })
 
-    function removeRedundantData(questions) {
-        $('#questionnaireForm select').each(function() {
-            // do something
-            console.log($(this).attr("data-question-id") + "::" + $('option:selected', this).val());
 
+
+
+    function checkRedundantData() {
+        var types = ["text", "textarea"];
+        var idsToRemove = [];
+        $('#questionnaireForm select').each(function() {
+            var set = types.indexOf($('option:selected', this).val());
+            if (set != -1) {
+                idsToRemove.push($(this).attr("data-question-id"));
+            }
         });
+
+        removeDrops(idsToRemove);
+    }
+
+
+    function removeDrops(ids) {
+
+
+        var formData = new FormData();
+        formData.append('do', 'deleteRedundantData');
+        formData.append("data", JSON.stringify(ids));
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                popSuccess(response);
+                // populateExistingForm($('#formTitle').attr("data-question-set"));
+            }
+        })
     }
 
 
@@ -374,6 +403,7 @@ $(document).ready(function() {
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
                 $('#formTitle').attr('data-question-set', obj.data.question_set);
+                popSuccess(response);
             },
         })
     });
