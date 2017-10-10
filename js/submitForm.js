@@ -1,7 +1,6 @@
 $(document).ready(function() {
     $('button[type="submit"]').on('click', function(e) {
         var userId = $('#userId').val();
-        alert(userId);
         e.preventDefault();
         var formData = $('form').serializeArray();
         var obj = {

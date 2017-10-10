@@ -209,7 +209,7 @@ function saveQuestion(){
 				'question'		=> $inputs->question,
 				'input_type'	=> $inputs->replyType,
 				'question_set'	=> $inputs->question_set_id,
-				'position'		=> $inputs->position
+				'position'		=> $inputs->position,
 			);
 			$where = "id = {$inputs->question_id}";
 			$result = DB::update("questions", $data, $where);
@@ -340,27 +340,31 @@ function saveAnswers(){
     	}
 	}
 
-	$arr = cleanMe($arr);
-
-
-	$query = "SELECT id FROM answers WHERE question_id = $questionId AND  USER_ID = $userId";
-
-	$row = pg_fetch_assoc(pg_query($query));
-	if($row){
+	$sql = "SELECT id FROM answers WHERE question_id = $questionId AND  USER_ID = $userId";
+	$query = DB::query($sql, false);
+	if($query->rowCount() > 0){
 		foreach ($arr as $value => $answer){
 			$id = substr($value, strpos($value, "_") + 1);
-			$query = "UPDATE answers SET ANSWER = $answer WHERE QUESTION_ID = $id AND USER_ID = $userId";
-			$result = pg_query($query);
-			$insert_row = pg_fetch_row($result);
-			
-		}
-		json_response('ok', 'Your answers have been updated');
+			$data = array(
+				'answer'		=> $answer,
+			);
+
+			$where = "question_id = {$id} AND user_id = {$userId}";
+			$result = DB::update("answers", $data, $where);
+			json_response('ok', 'Your answers have been updated');
+				
+			}
 	}else{
 		foreach ($arr as $value => $answer){
 			$id = substr($value, strpos($value, "_") + 1);
-			$query = "INSERT INTO answers(answer, question_id, user_id) VALUES ($answer, $id, $userId)";
-			$result = pg_query($query);
-			$insert_row = pg_fetch_row($result);	
+			$data = array(
+				'answer'		=> $answer,
+				'question_id'	=> $id,
+				'user_id'		=> $userId,
+			);
+
+			$result = DB::insert("answers", $data);
+			$insert_row = $result;	
 			
 		}
 

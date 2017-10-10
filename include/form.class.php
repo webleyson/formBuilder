@@ -17,16 +17,13 @@ class Form
         $this->userId = $userId;
         $questionSet = $this->getQuestionSet($this->questionSetId, $this->userId);
         $this->title = $questionSet[0]->question_set_name;
-
         $this->buildForm($this->getOptions($questionSet));
       
     }
     
 
 
-
     public function buildForm($questions){
-
         foreach ($questions as $question){
 
             switch ($question->input_type) {
@@ -42,7 +39,7 @@ class Form
 
                 case 'checkbox':
                     $checkbox = new CheckboxElement($question->question,  'checkbox_'. $question->id .'',  'checkbox_'. $question->id .'', $question->answer);
-                    foreach ($question['options'] as $key => $value) {
+                    foreach ($question->options as $key => $value) {
                         $checkbox->addAttribute($value, $value);
                     }
                     $this->addElement($checkbox);
@@ -51,7 +48,7 @@ class Form
 
                  case 'radio':
                     $radio = new RadioButtonElement($question->question, 'radio'. $question->id .'',  'radio_'. $question->id .'', $question->answer);
-                    foreach ($question['options'] as $key => $value) {
+                    foreach ($question->options as $key => $value) {
                         $radio->addAttribute($value, $value);
                     }
                     $this->addElement($radio);
@@ -111,33 +108,26 @@ class Form
 
     public function getOptions($questionSet)
     {
-
         $completeQuestions = array();
         foreach($questionSet as $question){
 
             $sql = "SELECT answer_option FROM options WHERE question_id = {$question->id}";
             $query = DB::query($sql, false);
 
-            if ($query->rowCount()>0){
                 $options = array();
-
                 while($row = $query->fetchObject()){
                     array_push($options, $row->answer_option);
                 }
 
-                $question->options = $options;
-                $completeQuestions[] = $question;
-            }else{
-                return false;
-            }
-
-           
-    }
+            $question->options = $options;
+            $completeQuestions[] = $question;
+        }
      return $completeQuestions;
-}
+    }
 
             
-    
+
+
     public function build()
     {
         $elements= "";
@@ -145,7 +135,7 @@ class Form
         {
             $elements .= $element->build();
         }
-        return '<div class="container"><h2>'.$this->title.'</h2><form id="myForm" action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . '  <button type="submit" class="btn btn-primary">Submit form</button></form></div>';
+        return '<input type="hidden" name="userId" id="userId" value="'.$this->userId.'"><div class="container"><h2>'.$this->title.'</h2><form id="myForm" action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . '  <button type="submit" class="btn btn-primary">Submit form</button></form></div>';
     }
 }
 
