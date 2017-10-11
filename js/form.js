@@ -477,6 +477,9 @@ $(document).ready(function() {
         var obj = {};
 
         var rows = $('.questionContainer');
+        var $questions = $('ul#questionnaireForm'),
+            $questionsli = $questions.children('li');
+        var liposition = $questionsli.length;
 
         rows.each(function(index) {
             var obj = {
@@ -484,7 +487,7 @@ $(document).ready(function() {
                 replyType: $(this).find('.replyOption').val(),
                 question_id: $(this).find('.rowContainer').val(),
                 question_set_id: $('#formTitle').attr("data-question-set"),
-                position: $(this).attr('data-question-position') ? $(this).attr('data-question-position') : 0,
+                position: $(this).attr('data-question-position') ? $(this).attr('data-question-position') : liposition,
             };
             qSet.push(obj);
         });
