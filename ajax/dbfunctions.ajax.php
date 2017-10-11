@@ -52,8 +52,41 @@ switch($do){
 	case 'deleteRedundantData':
 		deleteRedundantData();
 		break;
+	case 'showReport':
+		showReport();
+		break;
+	case 'showUsers':
+		showUsers();
+		break;
+	case 'checkOptions':
+		checkOptions();
+		break;
 }
 
+
+function showUsers(){
+	$qid = json_decode($_POST['questionId']);
+}
+
+function showReport(){
+	$qid = json_decode($_POST['questionId']);
+	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, questions.question, questions.input_type, answers.answer, answers.user_id FROM questions
+			JOIN nameids ON nameids.question_set_id = questions.question_set
+			RIGHT JOIN answers ON answers.question_id = questions.id
+			WHERE nameids.question_set_id = $qid";
+	$query = DB::query($sql, false);
+	if ($query->rowCount()>0){
+		$data = array();
+		while($row = $query->fetchObject()){
+			array_push($data, $row);
+		}
+
+		json_response('ok', 'New question set', $data);
+	}else{
+		json_response('ok', 'No sets exitst');
+		return;
+	}
+}
 function getAllQuestionSets(){
 	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, count(questions.question_set) FROM nameids LEFT JOIN questions ON nameids.question_set_id = questions.question_set GROUP BY nameids.question_set_name, nameids.question_set_id";
 

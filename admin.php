@@ -15,6 +15,11 @@ include('include/layout/header.php');
       <div id="questionSets">
 
       </div>
+      <div class="container" id="reports">
+        <table id="reportsTable">
+         
+        </table>
+      </div>
 
       <!-- Modal -->
       <div class="modal fade" id="addForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

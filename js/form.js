@@ -15,13 +15,12 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
-                console.log(obj);
                 if (obj.status == "ok") {
                     var questionDiv = $("#questionSets");
                     questionDiv.empty();
                     var list = $(questionDiv).append('<ul></ul>').find('ul');
                     $.each(obj.data, function(i, v) {
-                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a><div>Form ID :' + v.question_set_id + '</div></li>');
+                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a><div>Form ID :' + v.question_set_id + '</div><button class="viewReport" data-question-id="' + v.question_set_id + '">View Report</button></li>');
                     });
                 }
             },
@@ -63,7 +62,63 @@ $(document).ready(function() {
     })
 
 
+    $('#questionSets').on('click', '.viewReport', function() {
+        // showUserAnswers($(this).attr("data-question-id"));
+        showReport($(this).attr("data-question-id"));
+    });
 
+    function showUserAnswers(questionId) {
+        var formData = new FormData();
+        formData.append('do', 'showUsers');
+        formData.append("questionId", questionId);
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                var obj = jQuery.parseJSON(response);
+                var table = $('table#reportsTable');
+
+                $.each(obj.data, function(i, v) {
+                    table.append(rowData);
+                })
+            }
+        })
+    }
+
+    function showReport(questionId) {
+        var formData = new FormData();
+        formData.append('do', 'showReport');
+        formData.append("questionId", questionId);
+        $.ajax({
+            url: "ajax/dbfunctions.ajax.php",
+            type: 'POST',
+            data: formData,
+            dataType: 'html',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(response) {
+                var obj = jQuery.parseJSON(response);
+                var table = $('table#reportsTable');
+                var tbody = $('<tbody></tbody>');
+                var thead = $('<head><tr><th>User ID </th><th>Question</th><th>Answer</th></head >');
+
+                $.each(obj.data, function(i, v) {
+                    console.log(v);
+                    var rowData = '<tr><td>' + v.user_id + '</td><td>' + v.question + '</td><td>' + v.answer + '</td></tr>';
+
+                    tbody.append(rowData);
+                })
+
+                table.html(tbody);
+            }
+        })
+    }
 
     function checkRedundantData() {
         var types = ["text", "textarea"];
@@ -292,7 +347,6 @@ $(document).ready(function() {
                 if (obj.status == "ok") {
                     var qForm = $('#questionnaireForm');
                     qForm.empty();
-                    console.log(obj);
 
                     $.each(obj.data, function(i, v) {
                         $html = '<li data-question-position="' + v['position'] + '" id="row_' + v['id'] + '" class="row questionContainer"><input class="rowContainer addToDB" type="hidden" value="' + v['id'] + '" name="question_id"><div class="col-md-9 extraSpacingBottom"><input placeholder="Ask your question" value="' + v['question'] + '" class="form-control question addToDB" type="text" name="question" id=""><a data-question-id="' + v['id'] + '"  class="remove hover">Remove Question</a></div>';
@@ -334,6 +388,7 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
+                console.log(obj);
                 if (obj.status == "ok") {
                     var optionContainer = $('<div data-options-container-id="' + qid + '" class="col-xs-12 optionContainer"></div>');
 
@@ -341,7 +396,6 @@ $(document).ready(function() {
                         $("#row_" + qid + "").append(optionContainer);
 
                     } else {
-                        console.log(obj);
 
                         $.each(obj.data, function(i, v) {
                             var formValue = v['answer_option'] ? v['answer_option'] : "";
@@ -356,6 +410,11 @@ $(document).ready(function() {
                     var addText = '<i data-question-id="' + qid + '" class="fa fa-plus hover addOption" aria-hidden="true"></i>';
                     optionContainer.append(addText);
 
+                } else {
+                    var optionContainer = $('<div data-options-container-id="' + qid + '" class="col-xs-12 optionContainer"></div>');
+                    $("#row_" + qid + "").append(optionContainer);
+                    var addText = '<i data-question-id="' + qid + '" class="fa fa-plus hover addOption" aria-hidden="true"></i>';
+                    optionContainer.append(addText);
                 }
             }
         })
@@ -437,22 +496,6 @@ $(document).ready(function() {
 
 
         ajaxUpdate(formData);
-
-
-        switch (selectVal.value) {
-            default: hideOptions($(selectVal).attr('data-question-id'));
-            break;
-            case "select":
-                    addSelectOption($(selectVal).attr('data-question-id'));
-                break;
-            case "radio":
-                    addSelectOption($(selectVal).attr('data-question-id'));
-                break;
-            case "checkbox":
-                    addSelectOption($(selectVal).attr('data-question-id'));
-                break;
-        }
-
 
     }
 
