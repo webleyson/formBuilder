@@ -20,7 +20,7 @@ $(document).ready(function() {
                     questionDiv.empty();
                     var list = $(questionDiv).append('<ul></ul>').find('ul');
                     $.each(obj.data, function(i, v) {
-                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a><div>Form ID :' + v.question_set_id + '</div><button class="viewReport" data-question-id="' + v.question_set_id + '">View Report</button></li>');
+                        list.append('<li class="box"><a class="form_delete"  data-value="' + v.question_set_id + '">delete form</a><h2>' + v.count + '</h2><p>Questions</p><a data-question-set-id="' + v.question_set_id + '" class="loadExistingForm hover" data-toggle="modal" data-target="#addForm">' + v.question_set_name + '</a><div>Form ID :' + v.question_set_id + '</div><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#reportsModal" data-question-id="' + v.question_set_id + '">View Report</button></li>');
                     });
                 }
             },
@@ -58,14 +58,15 @@ $(document).ready(function() {
 
     $('#saveChanges').click(function() {
 
-        checkRedundantData();
+        if (confirm("Pushing OK will permanently remove any option's that are not shown")) {
+            checkRedundantData();
+        } else {
+            alert("There may still be options that are not being used. ");
+        }
     })
 
 
-    $('#questionSets').on('click', '.viewReport', function() {
-        // showUserAnswers($(this).attr("data-question-id"));
-        showReport($(this).attr("data-question-id"));
-    });
+
 
     function showUserAnswers(questionId) {
         var formData = new FormData();
@@ -90,35 +91,7 @@ $(document).ready(function() {
         })
     }
 
-    function showReport(questionId) {
-        var formData = new FormData();
-        formData.append('do', 'showReport');
-        formData.append("questionId", questionId);
-        $.ajax({
-            url: "ajax/dbfunctions.ajax.php",
-            type: 'POST',
-            data: formData,
-            dataType: 'html',
-            processData: false,
-            contentType: false,
-            cache: false,
-            success: function(response) {
-                var obj = jQuery.parseJSON(response);
-                var table = $('table#reportsTable');
-                var tbody = $('<tbody></tbody>');
-                var thead = $('<head><tr><th>User ID </th><th>Question</th><th>Answer</th></head >');
 
-                $.each(obj.data, function(i, v) {
-                    console.log(v);
-                    var rowData = '<tr><td>' + v.user_id + '</td><td>' + v.question + '</td><td>' + v.answer + '</td></tr>';
-
-                    tbody.append(rowData);
-                })
-
-                table.html(tbody);
-            }
-        })
-    }
 
     function checkRedundantData() {
         var types = ["text", "textarea"];

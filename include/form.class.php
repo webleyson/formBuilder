@@ -15,8 +15,8 @@ class Form
         $this->action = $action;
         $this->method = $method;
         $this->userId = $userId;
-        $questionSet = $this->getQuestionSet($this->questionSetId, $this->userId);
-        $this->title = $questionSet[0]->question_set_name;
+        $this->title = $this->getTitle($this->questionSetId);
+        $questionSet = json_decode(json_encode($this->getQuestionSet($this->questionSetId, $this->userId)));
         $this->buildForm($this->getOptions($questionSet));
       
     }
@@ -86,24 +86,57 @@ class Form
     }
 
 
+    private function getTitle($qid){
+        $sql = "SELECT DISTINCT question_set_name  FROM nameids  WHERE question_set_id = '$qid'";
+
+        $query = DB::query($sql, false);
+
+        if ($query->rowCount()>0){
+            while($row = $query->fetchObject()){
+                return $row->question_set_name;
+            }
+        }
+    }
+
     public function getQuestionSet($setId, $userId)
     {
 
-        $sql = "SELECT DISTINCT questions.id, questions.question, questions.input_type, questions.position, questions.question_set, question_set_name, question_set_id, answer FROM questions LEFT JOIN nameids ON questions.question_set = nameids.question_set_id LEFT JOIN answers ON questions.id = answers.question_id WHERE nameids.question_set_id = '$setId' ORDER BY position";
+        // $oldsql = "SELECT DISTINCT questions.id, questions.question, questions.input_type, questions.position, questions.question_set, question_set_name, question_set_id, answers.user_id, answers.answer FROM questions LEFT JOIN nameids ON questions.question_set = nameids.question_set_id LEFT JOIN answers ON questions.id = answers.question_id WHERE nameids.question_set_id = '$setId' AND answers.user_id = '$userId' ORDER BY position";
+
+
+        $sql = "SELECT DISTINCT questions.id, questions.question, questions.input_type, questions.position, questions.question_set, question_set_name, question_set_id  FROM questions LEFT JOIN nameids ON questions.question_set = nameids.question_set_id  WHERE nameids.question_set_id = '$setId'  ORDER BY position";
+
+
        
         $query = DB::query($sql, false);
 
-
         if ($query->rowCount()>0){
-        $data = array();
+            $data = array();
+
             while($row = $query->fetchObject()){
-                array_push($data, $row);
+                $rowcopy = clone($row);
+                $data[$rowcopy->id] = json_decode(json_encode($rowcopy), true);
+                $answers = "SELECT answers.id, answers.answer, answers.user_id, answers.question_id FROM answers WHERE question_id = $row->id AND user_id = $userId";
+                $query2 = DB::query($answers, false);
+                $answerQ = '';
+                if($query2->rowCount() > 0){
+                     while($thisRow = $query2->fetchObject()){
+                    $answerQ = $thisRow->answer;
+                  }
+                }
+                
+
+                $data[$rowcopy->id]['answer'] = $answerQ;
+               
             }
-            return $data;
+        
         }else{
             return false;
         }   
 
+
+
+       return $data;
     }
 
     public function getOptions($questionSet)

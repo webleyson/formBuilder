@@ -47,6 +47,59 @@ include('include/layout/header.php');
           </div>
         </div>
       </div>   	
+
+
+      <!-- Modal -->
+<div class="modal fade" id="reportsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+          <div class="table-responsive">
+                                        <table class="table table-bordered table-hover table-striped">
+                                           <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Question</th>
+                                                  
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>3326</td>
+                                                    <td>10/21/2013</td>
+                                                   
+                                                </tr>
+                                              
+                                            </tbody>
+                                            <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Question 2</th>
+                                                  
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>3326</td>
+                                                    <td>10/21/2013</td>
+                                                   
+                                                </tr>
+                                              
+                                            </tbody>
+                                        </table>
+                                    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 	</div>
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
@@ -59,6 +112,7 @@ include('include/layout/header.php');
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="js/form.js"></script>
+    <script src="js/reporting.js"></script>
   </body>
 </html>
 	

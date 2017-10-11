@@ -46,9 +46,6 @@ switch($do){
 	case 'deleteQuestion':
 		deleteQuestion();
 		break;
-	case 'formAnswers':
-		saveAnswers();
-		break;
 	case 'deleteRedundantData':
 		deleteRedundantData();
 		break;
@@ -60,6 +57,9 @@ switch($do){
 		break;
 	case 'checkOptions':
 		checkOptions();
+		break;
+	case 'formAnswers':
+		saveAnswers();
 		break;
 }
 
@@ -352,12 +352,6 @@ function createAndGetId(){
 		echo "Error creating question";
 	}
 	
-	/*if (!$result){
-		echo "Error creating question";
-	}else{
-		$data = array('last_row' => ($insert_row[0]), 'question_set' => ($insert_row[1]), 'position' => ($insert_row[2]));
-		json_response('ok', 'Question set Created', $data);
-	}*/	
 }
 
 function saveAnswers(){
@@ -369,7 +363,7 @@ function saveAnswers(){
 		if (!array_key_exists($v['name'], $arr)) {
         	$arr[$v['name']] = $v['value'];
     	}else{
-          $arr[$v['name']] .=  ", " .$v['value'];
+          	$arr[$v['name']] .=  ", " .$v['value'];
     	}
 	}
 
@@ -381,12 +375,10 @@ function saveAnswers(){
 			$data = array(
 				'answer'		=> $answer,
 			);
-
 			$where = "question_id = {$id} AND user_id = {$userId}";
-			$result = DB::update("answers", $data, $where);
+			$result = DB::update("answers", $data, $where);	
+		}
 			json_response('ok', 'Your answers have been updated');
-				
-			}
 	}else{
 		foreach ($arr as $value => $answer){
 			$id = substr($value, strpos($value, "_") + 1);
@@ -395,12 +387,9 @@ function saveAnswers(){
 				'question_id'	=> $id,
 				'user_id'		=> $userId,
 			);
-
 			$result = DB::insert("answers", $data);
 			$insert_row = $result;	
-			
 		}
-
 		json_response('ok', 'Your answers have been saved');
 	}
 }

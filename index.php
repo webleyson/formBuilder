@@ -8,7 +8,7 @@ include('include/form.class.php');
 
 	</head>
 	<body>
-	<?php  $form = new Form(228, 1);	?>
+	<?php  $form = new Form(228, 4);?>
 	
 
 	<div class="container">
