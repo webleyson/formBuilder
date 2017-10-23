@@ -15,6 +15,7 @@ $(document).ready(function() {
             cache: false,
             success: function(response) {
                 var obj = jQuery.parseJSON(response);
+                console.log(obj);
                 if (obj.status == "ok") {
                     var questionDiv = $("#questionSets");
                     questionDiv.empty();

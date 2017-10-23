@@ -70,10 +70,13 @@ function showUsers(){
 
 function showReport(){
 	$qid = json_decode($_POST['questionId']);
-	$sql = "SELECT nameids.question_set_name, nameids.question_set_id, questions.question, questions.input_type, answers.answer, answers.user_id FROM questions
-			JOIN nameids ON nameids.question_set_id = questions.question_set
-			RIGHT JOIN answers ON answers.question_id = questions.id
-			WHERE nameids.question_set_id = $qid";
+	$sql = "SELECT  questions.question, questions.id, answers.user_id, nameids.question_set_name, nameids.question_set_id,questions.input_type, answers.answer FROM questions
+			JOIN nameids ON nameids.question_set_id = questions.question_set 
+			RIGHT JOIN answers ON answers.question_id = questions.id 
+			WHERE nameids.question_set_id = $qid
+			ORDER BY question, user_id";
+			
+
 	$query = DB::query($sql, false);
 	if ($query->rowCount()>0){
 		$data = array();
@@ -96,6 +99,17 @@ function getAllQuestionSets(){
 		$data = array();
 		while($row = $query->fetchObject()){
 			array_push($data, $row);
+		}
+		$responseCount = "";
+		$sqlCount = "SELECT COUNT(DISTINCT user_id) FROM answers";
+		$queryCount = DB::query($sqlCount, false);
+		if ($queryCount->rowCount()>0){
+
+			while($row = $queryCount->fetchObject()){
+				$responseCount = $row->count;
+			}
+		}else{
+			$responseCount = 0;
 		}
 	}else{
 		json_response('ok', 'No sets exitst');

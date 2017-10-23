@@ -112,3 +112,8 @@
     .modal-header {
         height: 120px;
     }
+    /*ADMIN SIDE */
+
+    #reportsModal .modal-header {
+        height: auto;
+    }
