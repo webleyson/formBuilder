@@ -168,7 +168,7 @@ class Form
         {
             $elements .= $element->build();
         }
-        return '<input type="hidden" name="userId" id="userId" value="'.$this->userId.'"><div class="container"><h2>'.$this->title.'</h2><form id="myForm" action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . '  <button type="submit" class="btn btn-primary">Submit form</button></form></div>';
+        return '<input type="hidden" name="userId" id="userId" value="'.$this->userId.'"><div class="dynamicFormContent container"><h2>'.$this->title.'</h2><form id="myForm" action="' . $this->action . '" method="' . $this->method . '"> ' . $elements . '  <button type="submit" class="btn btn-primary">Submit form</button></form></div>';
     }
 }
 

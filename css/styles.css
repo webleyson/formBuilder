@@ -1,22 +1,22 @@
-    .createForm:hover {
+    .formBuilderAdministration .createForm:hover {
         cursor: pointer;
     }
 
-    select.form-control {
+    .formBuilderAdministration select.form-control {
         height: 34px !important;
     }
 
-    ul {
+    .formBuilderAdministration ul {
         list-style: none;
         padding: 0;
     }
 
-    #questionSets ul {
+    .formBuilderAdministration #questionSets ul {
         padding: 0;
         list-style: none;
     }
 
-    #questionSets ul li {
+    .formBuilderAdministration #questionSets ul li {
         display: inline-block;
         border: 1px solid grey;
         height: 190px;
@@ -26,7 +26,7 @@
         text-align: center;
     }
 
-    #questionSets ul li a.loadExistingForm {
+    .formBuilderAdministration #questionSets ul li a.loadExistingForm {
         padding: 10px;
         bottom: 0;
         width: 100%;
@@ -37,13 +37,13 @@
         display: inline-block;
     }
 
-    .questionContainer {
+    .formBuilderAdministration .questionContainer {
         padding-top: 15px;
         background: antiquewhite;
         margin: 15px 0;
     }
 
-    .box {
+    .formBuilderAdministration .box {
         -webkit-box-shadow: 0 2px 1px #777;
         -moz-box-shadow: 0 2px 1px #777;
         box-shadow: 0 2px 1px #777;
@@ -51,24 +51,24 @@
         background-color: lightgrey;
     }
 
-    #formTitle {
+    .formBuilderAdministration #formTitle {
         width: 100%;
         border: 0;
         padding: 10px;
         font-size: 30px;
     }
 
-    .hover:hover {
+    .formBuilderAdministration .hover:hover {
         cursor: pointer;
     }
 
-    .ordering {
+    .formBuilderAdministration .ordering {
         font-size: 22px;
         margin-right: 10px;
     }
 
 
-    a.form_delete {
+    .formBuilderAdministration a.form_delete {
         background-color: pink !important;
         position: absolute;
         left: 0;
@@ -77,39 +77,39 @@
         width: auto;
     }
 
-    .extraSpacingBottom {
+    .formBuilderAdministration .extraSpacingBottom {
         height: 60px;
     }
 
-    a.remove {
+    .formBuilderAdministration a.remove {
         font-size: 10px;
         display: none;
     }
 
-    .optionContainer {
+    .formBuilderAdministration .optionContainer {
         padding: 10px 10px 25px 10px;
         background: floralwhite;
     }
 
-    .optionContainer input {
+    .formBuilderAdministration .optionContainer input {
         margin-bottom: 10px;
         width: 70%;
         float: left;
     }
 
-    .optionRemove {
+    .formBuilderAdministration .optionRemove {
         display: inline-block;
         float: right;
         font-size: 23px;
     }
 
-    .addOption {
+    .formBuilderAdministration .addOption {
         position: absolute;
         bottom: 5px;
         left: 5px;
     }
 
-    .modal-header {
+    .formBuilderAdministration .modal-header {
         height: 120px;
     }
     /*ADMIN SIDE */

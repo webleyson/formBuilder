@@ -3,7 +3,7 @@ include('include/layout/header.php');
 ?>
 
   <body>
-  	<div class="container">
+  	<div class="formBuilderAdministration container">
     	<h1>Create your form</h1>
 
     
